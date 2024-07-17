@@ -1,10 +1,10 @@
 #define GAS_SENSOR_PIN A3 // Change this to the pin you've connected the gas sensor to
 
 const int MQ_PIN = A0;
-float RO_CLEAN_AIR_FACTOR = 9.83;
+float RO_CLEAN_AIR_FACTOR = 9.56;
 
 float Ro = 10;
-int RL_VALUE = 10;
+int RL_VALUE = 10000;
 
 int CALIBARAION_SAMPLE_TIMES = 50;
 int CALIBRATION_SAMPLE_INTERVAL = 500;
