@@ -1,6 +1,6 @@
-#define GAS_SENSOR_PIN A3         // Change this to the pin you've connected the gas sensor to
-int RL_VALUE = 10000;              // 10 kohm
-float RO_CLEAN_AIR_FACTOR = 9.56; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
+#define GAS_SENSOR_PIN A4         // Change this to the pin you've connected the gas sensor to
+int RL_VALUE = 1000;             // 1 kohm
+float RO_CLEAN_AIR_FACTOR = 9.72; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
 float Ro = 10;
 
 int CALIBARAION_SAMPLE_TIMES = 50;
@@ -10,7 +10,9 @@ int READ_SAMPLE_TIMES = 5;
 
 float rs_ro = 0;
 
-float LPGLPGCurve[3] = {-2.13, 2.77};
+#define GAS_LPG 0
+
+float LPGLPGCurve[2] = {-2.14, 2.99};
 
 void setup()
 {
@@ -25,25 +27,32 @@ void setup()
 
     Serial.println("Calibration is done...\n");
     Serial.print("Ro=");
-    Serial.print(Ro/1000);
+    Serial.print(Ro / 1000);
     Serial.println("kohm");
     delay(5000);
 }
 
 void loop()
 {
-    float voltA0 = analogRead(GAS_SENSOR_PIN) / 1023.0 * 5.0;
-    Serial.println(voltA0); // Print "Hello, World!" to the serial monitor
-    // Serial.println("Hello, World! vs code"); // Print "Hello, World!" to the serial monitor
+    long iPPM_LPG = 0;
+    long rs = 0;
 
-    // caluclate the resistance of the sensor
-    float Rs = ((5.0 - voltA0) / voltA0) * RL_VALUE;
+    iPPM_LPG = MQGetGasPercentage(MQRead(GAS_SENSOR_PIN) / Ro, GAS_LPG);
+    rs = MQRead(GAS_SENSOR_PIN);
 
-    // print the value of the sensor
-    Serial.print("Rs: ");
-    Serial.println(Rs);
+    Serial.println();
+    Serial.print("DATA,TIME,");
+    Serial.print(rs);
+    Serial.print(",");
+    Serial.print(Ro);
+    Serial.print(",");
+    Serial.print(rs / Ro);
+    Serial.print(",");
+    Serial.print(log10(rs / Ro));
+    Serial.print(",");
+    Serial.print(iPPM_LPG);
 
-    delay(5000); // Delay for 1 second
+    
 }
 
 float MQResistanceCalculation(int raw_adc)
@@ -86,7 +95,7 @@ float MQRead(int mq_pin)
 long MQGetPercentage(float rs_ro_ratio, float *pcurve)
 {
 
-    float res = (pow(10, (pcurve[0] * rs_ro_ratio + pcurve[1])));
+    float res = (pow(10, (pcurve[0] * log10(rs_ro_ratio) + pcurve[1])));
 
     return (long)res;
 }
@@ -100,4 +109,14 @@ int power(int base, int exponent)
         result *= base;
     }
     return result;
+}
+
+long MQGetGasPercentage(float rs_ro_ratio, int gas_id)
+{
+    if (gas_id == GAS_LPG)
+    {
+        return MQGetPercentage(rs_ro_ratio, LPGLPGCurve);
+    }
+
+    return 0;
 }
