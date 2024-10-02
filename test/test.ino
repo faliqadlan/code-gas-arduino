@@ -14,12 +14,13 @@ void loop()
     // Serial.println(voltA0);
     // Serial.println(Rs);
     // Serial.println(rawAdc);
-    Serial.println("-------start-------");
-    Serial.println(analogRead(A1) / 1023.0 * 5.0);
-    Serial.println(analogRead(A2) / 1023.0 * 5.0);
-    Serial.println(analogRead(A3) / 1023.0 * 5.0);
-    Serial.println(analogRead(A4) / 1023.0 * 5.0);
-    Serial.println(analogRead(A5)  / 1023.0 * 5.0);
-    Serial.println("-------end-------");
-    delay(5000);
+    // Serial.println("-------start-------");
+    // Serial.println(analogRead(A1) / 1023.0 * 5.0);
+    // Serial.println(analogRead(A2) / 1023.0 * 5.0);
+    // Serial.println(analogRead(A3) / 1023.0 * 5.0);
+    // Serial.println(analogRead(A4) / 1023.0 * 5.0);
+    // Serial.println(analogRead(A5)  / 1023.0 * 5.0);
+    // Serial.println("-------end-------");
+    // delay(5000);
+    
 }
