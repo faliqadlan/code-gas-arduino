@@ -1,6 +1,6 @@
 #define GAS_SENSOR_PIN A4         // Change this to the pin you've connected the gas sensor to
 int RL_VALUE = 1000;             // 1 kohm
-float RO_CLEAN_AIR_FACTOR = 9.72; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
+float RO_CLEAN_AIR_FACTOR = 3.55; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
 float Ro = 10;
 
 int CALIBARAION_SAMPLE_TIMES = 50;
@@ -11,8 +11,10 @@ int READ_SAMPLE_TIMES = 5;
 float rs_ro = 0;
 
 #define GAS_LPG 0
+#define GAS_CO2 1
 
 float LPGLPGCurve[2] = {-2.14, 2.99};
+float CO2CurveMQ135[2] = {-0.348, 0.705};
 
 void setup()
 {
@@ -34,10 +36,12 @@ void setup()
 
 void loop()
 {
-    long iPPM_LPG = 0;
+    // long iPPM_LPG = 0;
+    long iPPM_CO2 = 0;
     long rs = 0;
 
-    iPPM_LPG = MQGetGasPercentage(MQRead(GAS_SENSOR_PIN) / Ro, GAS_LPG);
+    // iPPM_LPG = MQGetGasPercentage(MQRead(GAS_SENSOR_PIN) / Ro, GAS_LPG);
+    iPPM_CO2 = MQGetGasPercentage(MQRead(GAS_SENSOR_PIN) / Ro, GAS_CO2);
     rs = MQRead(GAS_SENSOR_PIN);
 
     Serial.println();
@@ -50,7 +54,7 @@ void loop()
     Serial.print(",");
     Serial.print(log10(rs / Ro));
     Serial.print(",");
-    Serial.print(iPPM_LPG);
+    Serial.print(iPPM_CO2);
 
     
 }
@@ -116,6 +120,9 @@ long MQGetGasPercentage(float rs_ro_ratio, int gas_id)
     if (gas_id == GAS_LPG)
     {
         return MQGetPercentage(rs_ro_ratio, LPGLPGCurve);
+    } else if (gas_id == GAS_CO2)
+    {
+        return MQGetPercentage(rs_ro_ratio, CO2CurveMQ135);
     }
 
     return 0;
