@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "oled-test\\oled-test.ino",
+    "sketch": "ndir\\ndir.ino",
     "port": "COM5"
 }
