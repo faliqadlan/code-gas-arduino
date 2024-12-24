@@ -55,6 +55,9 @@ void loop()
     Serial.print(log10(rs / Ro));
     Serial.print(",");
     Serial.print(iPPM_CO2);
+    
+    // delay 3s
+    delay(3000);
 
     
 }
