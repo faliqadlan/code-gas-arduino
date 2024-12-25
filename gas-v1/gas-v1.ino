@@ -126,15 +126,15 @@ long MQ135GetPPM(float x, float H)
 
     rs_ro_corr = RsRoCorrection(x, H, MQ135TempHumCurve33, MQ135TempHumCurve85);
 
-    Serial.print("rs_ro before correction: ");
+    Serial.print("MQ135 rs_ro before correction: ");
     Serial.println(rs_ro);
 
-    Serial.print("rs_ro_corr: ");
+    Serial.print("MQ135 rs_ro_corr: ");
     Serial.println(rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
-    Serial.print("rs_ro after correction: ");
+    Serial.print("MQ135 rs_ro after correction: ");
     Serial.println(rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, CO2_MQ135);
@@ -154,15 +154,15 @@ long MQ136GetPPM(float x, float H)
 
     rs_ro_corr = RsRoCorrection(x, H, MQ136TempHumCurve33, MQ136TempHumCurve85);
 
-    Serial.print("rs_ro before correction: ");
+    Serial.print("MQ136 rs_ro before correction: ");
     Serial.println(rs_ro);
 
-    Serial.print("rs_ro_corr: ");
+    Serial.print("MQ136 rs_ro_corr: ");
     Serial.println(rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
-    Serial.print("rs_ro after correction: ");
+    Serial.print("MQ136 rs_ro after correction: ");
     Serial.println(rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_MQ136);
@@ -271,18 +271,22 @@ long readNDIRCO2(int sensorIn)
 
     if (voltage == 0)
     {
-        Serial.println("Fault");
+        Serial.println("NDIR Fault");
     }
     else if (voltage < 400)
     {
-        Serial.println("Preheating");
+        Serial.println("NDIR Preheating");
+    }
+    else if (voltage > 2000)
+    {
+        Serial.println("NDIR Exceeding measurement range");
     }
     else
     {
         int voltage_difference = voltage - 400;
         float concentration = voltage_difference * 50.0 / 16.0;
         // Print Voltage
-        Serial.print("Voltage: ");
+        Serial.print("NDIR Voltage: ");
         Serial.print(voltage);
         Serial.println(" mv");
 
