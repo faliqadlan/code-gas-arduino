@@ -38,7 +38,7 @@ void setup()
     pinMode(MQ_136_PIN, INPUT);
     int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
     Serial.print("Calibrating gas sensor in ");
-    Serial.print(timeCal);
+    Serial.print(timeCal * 2);
     Serial.println(" seconds");
     Serial.println("Calibrating MQ135");
     Ro_MQ_135 = MQ135Calibration();
@@ -50,11 +50,11 @@ void setup()
 
     Serial.print("Ro MQ135=");
     Serial.print(Ro_MQ_135 / 1000);
-    Serial.print("kohm");
+    Serial.println("kohm");
 
-    Serial.println("Ro MQ136=");
+    Serial.print("Ro MQ136=");
     Serial.print(Ro_MQ_136 / 1000);
-    Serial.print("kohm");
+    Serial.println("kohm");
     delay(5000);
 
     dht11.begin(); // init sensor temp hum
@@ -77,7 +77,7 @@ void loop()
 
     Serial.print("Temperature: ");
     Serial.print(tempC);
-    Serial.print(" °C, Humidity: ");
+    Serial.print(" C, Humidity: ");
     Serial.print(humi);
     Serial.print(" %, CO2 (MQ135): ");
     Serial.print(ppmCo2Mq135);
@@ -117,16 +117,16 @@ long MQ135GetPPM(float x, float H)
 
     rs_ro_corr = RsRoCorrection(x, H, MQ135TempHumCurve33, MQ135TempHumCurve85);
 
-    Serial.println("rs_ro before correction: ");
-    Serial.print(rs_ro);
+    Serial.print("rs_ro before correction: ");
+    Serial.println(rs_ro);
 
-    Serial.println("rs_ro_corr: ");
-    Serial.print(rs_ro_corr);
+    Serial.print("rs_ro_corr: ");
+    Serial.println(rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
-    Serial.println("rs_ro after correction: ");
-    Serial.print(rs_ro);
+    Serial.print("rs_ro after correction: ");
+    Serial.println(rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, CO2_MQ135);
 
@@ -145,16 +145,16 @@ long MQ136GetPPM(float x, float H)
 
     rs_ro_corr = RsRoCorrection(x, H, MQ136TempHumCurve33, MQ136TempHumCurve85);
 
-    Serial.println("rs_ro before correction: ");
-    Serial.print(rs_ro);
+    Serial.print("rs_ro before correction: ");
+    Serial.println(rs_ro);
 
-    Serial.println("rs_ro_corr: ");
-    Serial.print(rs_ro_corr);
+    Serial.print("rs_ro_corr: ");
+    Serial.println(rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
-    Serial.println("rs_ro after correction: ");
-    Serial.print(rs_ro);
+    Serial.print("rs_ro after correction: ");
+    Serial.println(rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_MQ136);
 
