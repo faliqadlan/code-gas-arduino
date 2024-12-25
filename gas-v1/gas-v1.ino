@@ -3,6 +3,7 @@
 
 #define MQ_135_PIN PIN_A1                // Define the analog pin A1 for MQ135 sensor
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor
+#define NDIR_PIN PIN_A3                  // Define the analog pin A3 for NDIR sensor
 int RL_MQ_135 = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_MQ_136 = 1000;                    // Define the load resistance on the board, in kilo ohms
 float RO_MQ_135_CLEAN_AIR_FACTOR = 3.55; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
@@ -33,6 +34,9 @@ DHT dht11(DHT11_PIN, DHT11);
 
 void setup()
 {
+    // Set the default voltage of the reference voltage
+    analogReference(DEFAULT);
+
     Serial.begin(9600); // Initialize serial communication at 9600 baud rate
     pinMode(MQ_135_PIN, INPUT);
     pinMode(MQ_136_PIN, INPUT);
@@ -72,8 +76,10 @@ void loop()
     long ppmCo2Mq135 = MQ135GetPPM(tempC, humi);
 
     // ppm h2s mq 136
-
     long ppmH2sMq136 = MQ136GetPPM(tempC, humi);
+
+    // ppm co2 ndir
+    long ppmco2ndir = readNDIRCO2(NDIR_PIN);
 
     Serial.print("Temperature: ");
     Serial.print(tempC);
@@ -81,9 +87,12 @@ void loop()
     Serial.print(humi);
     Serial.print(" %, CO2 (MQ135): ");
     Serial.print(ppmCo2Mq135);
+    Serial.print(" %, CO2 (NDIR): ");
+    Serial.print(ppmco2ndir);
     Serial.print(" ppm, H2S (MQ136): ");
     Serial.print(ppmH2sMq136);
     Serial.println(" ppm");
+    
 
     // delay 3s
     delay(3000);
@@ -246,4 +255,39 @@ float RsRoCorrection(float x, float H, float *curve33, float *curve85)
     // Calculate Rs/Ro based on temperature x
     float y = a * x * x + b * x + c;
     return y;
+}
+
+long readNDIRCO2(int sensorIn)
+{
+
+    long ppmco2 = 0;
+    // Read voltage
+    int sensorValue = analogRead(sensorIn);
+    // The analog signal is converted to a voltage
+    float voltage = sensorValue * (5000.0 / 1023.0);
+
+    Serial.println(sensorValue);
+    Serial.println(voltage);
+
+    if (voltage == 0)
+    {
+        Serial.println("Fault");
+    }
+    else if (voltage < 400)
+    {
+        Serial.println("Preheating");
+    }
+    else
+    {
+        int voltage_difference = voltage - 400;
+        float concentration = voltage_difference * 50.0 / 16.0;
+        // Print Voltage
+        Serial.print("Voltage: ");
+        Serial.print(voltage);
+        Serial.println(" mv");
+
+        ppmco2 = (long)concentration;
+    }
+
+    return ppmco2;
 }
