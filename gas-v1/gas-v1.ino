@@ -52,7 +52,7 @@ void setup()
     pinMode(MQ_136_PIN, INPUT);
     int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
     Serial.print("Calibrating gas sensor in ");
-    Serial.print(timeCal * 2);
+    Serial.print(timeCal * 3);
     Serial.println(" seconds");
     Serial.println("Calibrating MQ135");
     Ro_MQ_135 = MQ135Calibration();
@@ -108,7 +108,7 @@ void loop()
     Serial.print(humi);
     Serial.print(" %, CO2 (MQ135): ");
     Serial.print(ppmCo2Mq135);
-    Serial.print(" %, CO2 (NDIR): ");
+    Serial.print(" ppm, CO2 (NDIR): ");
     Serial.print(ppmco2ndir);
     Serial.print(" ppm, H2S (MQ136): ");
     Serial.print(ppmH2sMq136);
@@ -356,7 +356,9 @@ long readNDIRCO2(int sensorIn)
     // The analog signal is converted to a voltage
     float voltage = sensorValue * (5000.0 / 1023.0);
 
+    Serial.print("NDIR Sensor");
     Serial.println(sensorValue);
+    Serial.print("NDIR Voltage");
     Serial.println(voltage);
 
     if (voltage == 0)
