@@ -3,13 +3,17 @@
 
 #define MQ_135_PIN PIN_A1                // Define the analog pin A1 for MQ135 sensor
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor
-#define NDIR_PIN PIN_A3                  // Define the analog pin A3 for NDIR sensor
+#define TGS_2602_PIN PIN_A3              // Define the analog pin A3 for TGS2602 sensor
+#define NDIR_PIN PIN_A4                  // Define the analog pin A4 for NDIR sensor
 int RL_MQ_135 = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_MQ_136 = 1000;                    // Define the load resistance on the board, in kilo ohms
+int RL_TGS_2602 = 4700;                  // Define the load resistance on the board, in kilo ohms
 float RO_MQ_135_CLEAN_AIR_FACTOR = 3.55; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
 float RO_MQ_136_CLEAN_AIR_FACTOR = 3.55; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
+float RO_TGS_2602_CLEAN_AIR_FACTOR = 1; // RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
 float Ro_MQ_135 = 10;                    // Ro is initialized to 10 kilo ohms
 float Ro_MQ_136 = 10;                    // Ro is initialized to 10 kilo ohms
+float Ro_TGS_2602 = 10;                  // Ro is initialized to 10 kilo ohms
 
 int CALIBARAION_SAMPLE_TIMES = 50;
 int CALIBRATION_SAMPLE_INTERVAL = 500;
@@ -18,17 +22,23 @@ int READ_SAMPLE_TIMES = 5;
 
 float Rs_ro_MQ_135 = 0;
 float Rs_ro_MQ_136 = 0;
+float Rs_ro_TGS_2602 = 0;
 
 #define CO2_MQ135 1
 #define H2S_MQ136 2
+#define H2S_TGS2602 3
 
 float CO2CurveMQ135[2] = {-0.348, 0.705};
 float H2SCurveMQ136[2] = {-0.35, 1.547};
+float H2SCurveTGS2602[2] = {-2.7245, -1.1293};
 
 float MQ135TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};
 float MQ135TempHumCurve85[3] = {0.0003, -0.023, 1.2528};
 float MQ136TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};
 float MQ136TempHumCurve85[3] = {0.0003, -0.023, 1.2528};
+float TGS2602TempHumCurve40[3] = {0.0002, -0.0349, 1.5619};
+float TGS2602TempHumCurve65[3] = {0.0002, -0.0373, 1.6632};
+float TGS2602TempHumCurve85[3] = {0.0003, -0.0443, 1.8361};
 
 DHT dht11(DHT11_PIN, DHT11);
 
@@ -50,15 +60,23 @@ void setup()
     Serial.println("Calibrating MQ136");
     Ro_MQ_136 = MQ136Calibration();
 
+    Serial.println("Calibrating TGS2602");
+    Ro_TGS_2602 = TGS2602Calibration();
+
     Serial.println("Calibration is done...\n");
 
     Serial.print("Ro MQ135=");
-    Serial.print(Ro_MQ_135 / 1000);
+    Serial.print(Ro_MQ_135 / RL_MQ_135);
     Serial.println("kohm");
 
     Serial.print("Ro MQ136=");
-    Serial.print(Ro_MQ_136 / 1000);
+    Serial.print(Ro_MQ_136 / RL_MQ_136);
     Serial.println("kohm");
+
+    Serial.print("Ro TGS2602=");
+    Serial.print(Ro_TGS_2602 / RL_TGS_2602);
+    Serial.println("kohm");
+
     delay(5000);
 
     dht11.begin(); // init sensor temp hum
@@ -78,6 +96,9 @@ void loop()
     // ppm h2s mq 136
     long ppmH2sMq136 = MQ136GetPPM(tempC, humi);
 
+    // ppm h2s tgs 2602
+    long ppmH2sTgs2602 = TGS2602GetPPM(tempC, humi);
+
     // ppm co2 ndir
     long ppmco2ndir = readNDIRCO2(NDIR_PIN);
 
@@ -91,8 +112,9 @@ void loop()
     Serial.print(ppmco2ndir);
     Serial.print(" ppm, H2S (MQ136): ");
     Serial.print(ppmH2sMq136);
+    Serial.print(" ppm, H2S (TGS2602): ");
+    Serial.print(ppmH2sTgs2602);
     Serial.println(" ppm");
-    
 
     // delay 3s
     delay(3000);
@@ -110,6 +132,14 @@ float MQ136Calibration()
 {
     float val;
     val = MQCalibration(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136);
+
+    return val;
+}
+
+float TGS2602Calibration()
+{
+    float val;
+    val = MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602);
 
     return val;
 }
@@ -166,6 +196,34 @@ long MQ136GetPPM(float x, float H)
     Serial.println(rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_MQ136);
+
+    return ppm_val;
+}
+
+long TGS2602GetPPM(float x, float H)
+{
+    float rs;
+    long ppm_val;
+    float rs_ro;
+    float rs_ro_corr;
+    rs = MQRead(TGS_2602_PIN, RL_TGS_2602);
+
+    rs_ro = rs / Ro_TGS_2602;
+
+    rs_ro_corr = RsRoCorrection3Curve(x, H, TGS2602TempHumCurve40, TGS2602TempHumCurve65, TGS2602TempHumCurve85);
+
+    Serial.print("TGS2602 rs_ro before correction: ");
+    Serial.println(rs_ro);
+
+    Serial.print("TGS2602 rs_ro_corr: ");
+    Serial.println(rs_ro_corr);
+
+    rs_ro = rs_ro / rs_ro_corr;
+
+    Serial.print("TGS2602 rs_ro after correction: ");
+    Serial.println(rs_ro);
+
+    ppm_val = MQGetGasPercentage(rs_ro, H2S_TGS2602);
 
     return ppm_val;
 }
@@ -235,6 +293,9 @@ long MQGetGasPercentage(float rs_ro_ratio, int gas_id)
     else if (gas_id == H2S_MQ136)
     {
         return MQGetPercentage(rs_ro_ratio, H2SCurveMQ136);
+    } else if (gas_id == H2S_TGS2602)
+    {
+        return MQGetPercentage(rs_ro_ratio, H2SCurveTGS2602);
     }
 
     return 0;
@@ -251,6 +312,35 @@ float RsRoCorrection(float x, float H, float *curve33, float *curve85)
     float a = a1 + (a2 - a1) * (H - 33) / (85 - 33);
     float b = b1 + (b2 - b1) * (H - 33) / (85 - 33);
     float c = c1 + (c2 - c1) * (H - 33) / (85 - 33);
+
+    // Calculate Rs/Ro based on temperature x
+    float y = a * x * x + b * x + c;
+    return y;
+}
+
+float RsRoCorrection3Curve(float x, float H, float *curve40, float *curve65, float *curve85)
+{
+    // Coefficients for humidity 40%
+    float a1 = curve40[0], b1 = curve40[1], c1 = curve40[2];
+    // Coefficients for humidity 65%
+    float a2 = curve65[0], b2 = curve65[1], c2 = curve65[2];
+    // Coefficients for humidity 85%
+    float a3 = curve85[0], b3 = curve85[1], c3 = curve85[2];
+
+    // Linear interpolation or extrapolation to get new coefficients
+    float a, b, c;
+    if (H <= 65)
+    {
+        a = a1 + (a2 - a1) * (H - 40) / (65 - 40);
+        b = b1 + (b2 - b1) * (H - 40) / (65 - 40);
+        c = c1 + (c2 - c1) * (H - 40) / (65 - 40);
+    }
+    else
+    {
+        a = a2 + (a3 - a2) * (H - 65) / (85 - 65);
+        b = b2 + (b3 - b2) * (H - 65) / (85 - 65);
+        c = c2 + (c3 - c2) * (H - 65) / (85 - 65);
+    }
 
     // Calculate Rs/Ro based on temperature x
     float y = a * x * x + b * x + c;
