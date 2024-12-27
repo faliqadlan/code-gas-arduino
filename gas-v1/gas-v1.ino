@@ -144,7 +144,7 @@ float TGS2602Calibration()
     return val;
 }
 
-long MQ135GetPPM(float x, float H)
+float MQ135GetPPM(float x, float H)
 {
     float rs;
     long ppm_val;
@@ -172,7 +172,7 @@ long MQ135GetPPM(float x, float H)
     return ppm_val;
 }
 
-long MQ136GetPPM(float x, float H)
+float MQ136GetPPM(float x, float H)
 {
     float rs;
     long ppm_val;
@@ -200,7 +200,7 @@ long MQ136GetPPM(float x, float H)
     return ppm_val;
 }
 
-long TGS2602GetPPM(float x, float H)
+float TGS2602GetPPM(float x, float H)
 {
     float rs;
     long ppm_val;
@@ -265,12 +265,12 @@ float MQRead(int mq_pin, float rl_value)
     return rs;
 }
 
-long MQGetPercentage(float rs_ro_ratio, float *pcurve)
+float MQGetPercentage(float rs_ro_ratio, float *pcurve)
 {
 
     float res = (pow(10, (pcurve[0] * log10(rs_ro_ratio) + pcurve[1])));
 
-    return (long)res;
+    return res;
 }
 
 // Power function
@@ -284,7 +284,7 @@ int power(int base, int exponent)
     return result;
 }
 
-long MQGetGasPercentage(float rs_ro_ratio, int gas_id)
+float MQGetGasPercentage(float rs_ro_ratio, int gas_id)
 {
     if (gas_id == CO2_MQ135)
     {
