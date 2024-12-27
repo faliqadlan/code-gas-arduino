@@ -28,8 +28,8 @@ float Rs_ro_TGS_2602 = 0;
 #define H2S_MQ136 2
 #define H2S_TGS2602 3
 
-float CO2CurveMQ135[2] = {-0.348, 0.705};
-float H2SCurveMQ136[2] = {-0.35, 1.547};
+float CO2CurveMQ135[2] = {-2.85, 2.0451};
+float H2SCurveMQ136[2] = {-3.5, 1.547};
 float H2SCurveTGS2602[2] = {-2.7245, -1.1293};
 
 float MQ135TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};
