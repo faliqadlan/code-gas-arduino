@@ -356,9 +356,9 @@ long readNDIRCO2(int sensorIn)
     // The analog signal is converted to a voltage
     float voltage = sensorValue * (5000.0 / 1023.0);
 
-    Serial.print("NDIR Sensor");
+    Serial.print("NDIR Sensor: ");
     Serial.println(sensorValue);
-    Serial.print("NDIR Voltage");
+    Serial.print("NDIR Voltage: ");
     Serial.println(voltage);
 
     if (voltage == 0)
