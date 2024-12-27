@@ -15,10 +15,10 @@ float Ro_MQ_135 = 10;                    // Ro is initialized to 10 kilo ohms
 float Ro_MQ_136 = 10;                    // Ro is initialized to 10 kilo ohms
 float Ro_TGS_2602 = 10;                  // Ro is initialized to 10 kilo ohms
 
-int CALIBARAION_SAMPLE_TIMES = 50;
-int CALIBRATION_SAMPLE_INTERVAL = 500;
-int READ_SAMPLE_INTERVAL = 50;
-int READ_SAMPLE_TIMES = 5;
+int CALIBARAION_SAMPLE_TIMES = 50;       // Number of samples for calibration
+int CALIBRATION_SAMPLE_INTERVAL = 500;   // Interval between samples during calibration
+int READ_SAMPLE_INTERVAL = 50;           // Interval between samples during reading
+int READ_SAMPLE_TIMES = 5;               // Number of samples for reading
 
 float Rs_ro_MQ_135 = 0;
 float Rs_ro_MQ_136 = 0;
@@ -28,17 +28,17 @@ float Rs_ro_TGS_2602 = 0;
 #define H2S_MQ136 2
 #define H2S_TGS2602 3
 
-float CO2CurveMQ135[2] = {-2.85, 2.0451};
-float H2SCurveMQ136[2] = {-3.5, 1.547};
-float H2SCurveTGS2602[2] = {-2.7245, -1.1293};
+float CO2CurveMQ135[2] = {-2.85, 2.0451}; // Curve for CO2 gas for MQ135 sensor
+float H2SCurveMQ136[2] = {-3.5, 1.547};   // Curve for H2S gas for MQ136 sensor
+float H2SCurveTGS2602[2] = {-2.7245, -1.1293}; // Curve for H2S gas for TGS2602 sensor
 
-float MQ135TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};
-float MQ135TempHumCurve85[3] = {0.0003, -0.023, 1.2528};
-float MQ136TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};
-float MQ136TempHumCurve85[3] = {0.0003, -0.023, 1.2528};
-float TGS2602TempHumCurve40[3] = {0.0002, -0.0349, 1.5619};
-float TGS2602TempHumCurve65[3] = {0.0002, -0.0373, 1.6632};
-float TGS2602TempHumCurve85[3] = {0.0003, -0.0443, 1.8361};
+float MQ135TempHumCurve33[3] = {0.0004, -0.0261, 1.3869}; // Temp-Humidity correction curve for MQ135 at 33% humidity
+float MQ135TempHumCurve85[3] = {0.0003, -0.023, 1.2528};  // Temp-Humidity correction curve for MQ135 at 85% humidity
+float MQ136TempHumCurve33[3] = {0.0004, -0.0261, 1.3869}; // Temp-Humidity correction curve for MQ136 at 33% humidity
+float MQ136TempHumCurve85[3] = {0.0003, -0.023, 1.2528};  // Temp-Humidity correction curve for MQ136 at 85% humidity
+float TGS2602TempHumCurve40[3] = {0.0002, -0.0349, 1.5619}; // Temp-Humidity correction curve for TGS2602 at 40% humidity
+float TGS2602TempHumCurve65[3] = {0.0002, -0.0373, 1.6632}; // Temp-Humidity correction curve for TGS2602 at 65% humidity
+float TGS2602TempHumCurve85[3] = {0.0003, -0.0443, 1.8361}; // Temp-Humidity correction curve for TGS2602 at 85% humidity
 
 DHT dht11(DHT11_PIN, DHT11);
 
@@ -84,7 +84,6 @@ void setup()
 
 void loop()
 {
-
     // read humidity
     float humi = dht11.readHumidity();
     // read temperature as Celsius
@@ -120,6 +119,10 @@ void loop()
     delay(3000);
 }
 
+/**
+ * Calibrates the MQ135 sensor.
+ * @return The calibrated Ro value for the MQ135 sensor.
+ */
 float MQ135Calibration()
 {
     float val;
@@ -128,6 +131,10 @@ float MQ135Calibration()
     return val;
 }
 
+/**
+ * Calibrates the MQ136 sensor.
+ * @return The calibrated Ro value for the MQ136 sensor.
+ */
 float MQ136Calibration()
 {
     float val;
@@ -136,6 +143,10 @@ float MQ136Calibration()
     return val;
 }
 
+/**
+ * Calibrates the TGS2602 sensor.
+ * @return The calibrated Ro value for the TGS2602 sensor.
+ */
 float TGS2602Calibration()
 {
     float val;
@@ -144,6 +155,12 @@ float TGS2602Calibration()
     return val;
 }
 
+/**
+ * Gets the CO2 PPM value from the MQ135 sensor.
+ * @param x The temperature value.
+ * @param H The humidity value.
+ * @return The CO2 PPM value.
+ */
 float MQ135GetPPM(float x, float H)
 {
     float rs;
@@ -172,6 +189,12 @@ float MQ135GetPPM(float x, float H)
     return ppm_val;
 }
 
+/**
+ * Gets the H2S PPM value from the MQ136 sensor.
+ * @param x The temperature value.
+ * @param H The humidity value.
+ * @return The H2S PPM value.
+ */
 float MQ136GetPPM(float x, float H)
 {
     float rs;
@@ -200,6 +223,12 @@ float MQ136GetPPM(float x, float H)
     return ppm_val;
 }
 
+/**
+ * Gets the H2S PPM value from the TGS2602 sensor.
+ * @param x The temperature value.
+ * @param H The humidity value.
+ * @return The H2S PPM value.
+ */
 float TGS2602GetPPM(float x, float H)
 {
     float rs;
@@ -228,11 +257,24 @@ float TGS2602GetPPM(float x, float H)
     return ppm_val;
 }
 
+/**
+ * Calculates the resistance of the sensor.
+ * @param raw_adc The raw ADC value.
+ * @param rl_value The load resistance value.
+ * @return The calculated resistance.
+ */
 float MQResistanceCalculation(int raw_adc, float rl_value)
 {
     return ((rl_value * (1023 - raw_adc) / raw_adc));
 }
 
+/**
+ * Calibrates the sensor.
+ * @param mq_pin The pin number of the sensor.
+ * @param ro_clean_air_factor The clean air factor for the sensor.
+ * @param rl_value The load resistance value.
+ * @return The calibrated Ro value.
+ */
 float MQCalibration(int mq_pin, float ro_clean_air_factor, float rl_value)
 {
     int i;
@@ -248,6 +290,12 @@ float MQCalibration(int mq_pin, float ro_clean_air_factor, float rl_value)
     return val;
 }
 
+/**
+ * Reads the sensor value.
+ * @param mq_pin The pin number of the sensor.
+ * @param rl_value The load resistance value.
+ * @return The sensor resistance value.
+ */
 float MQRead(int mq_pin, float rl_value)
 {
     int i;
@@ -265,15 +313,25 @@ float MQRead(int mq_pin, float rl_value)
     return rs;
 }
 
+/**
+ * Gets the gas percentage.
+ * @param rs_ro_ratio The Rs/Ro ratio.
+ * @param pcurve The curve for the gas.
+ * @return The gas percentage.
+ */
 float MQGetPercentage(float rs_ro_ratio, float *pcurve)
 {
-
     float res = (pow(10, (pcurve[0] * log10(rs_ro_ratio) + pcurve[1])));
 
     return res;
 }
 
-// Power function
+/**
+ * Power function.
+ * @param base The base value.
+ * @param exponent The exponent value.
+ * @return The result of base raised to the power of exponent.
+ */
 int power(int base, int exponent)
 {
     int result = 1;
@@ -284,6 +342,12 @@ int power(int base, int exponent)
     return result;
 }
 
+/**
+ * Gets the gas percentage for a specific gas.
+ * @param rs_ro_ratio The Rs/Ro ratio.
+ * @param gas_id The gas ID.
+ * @return The gas percentage.
+ */
 float MQGetGasPercentage(float rs_ro_ratio, int gas_id)
 {
     if (gas_id == CO2_MQ135)
@@ -301,6 +365,14 @@ float MQGetGasPercentage(float rs_ro_ratio, int gas_id)
     return 0;
 }
 
+/**
+ * Corrects the Rs/Ro ratio based on temperature and humidity.
+ * @param x The temperature value.
+ * @param H The humidity value.
+ * @param curve33 The curve for 33% humidity.
+ * @param curve85 The curve for 85% humidity.
+ * @return The corrected Rs/Ro ratio.
+ */
 float RsRoCorrection(float x, float H, float *curve33, float *curve85)
 {
     // Coefficients for humidity 33%
@@ -318,6 +390,15 @@ float RsRoCorrection(float x, float H, float *curve33, float *curve85)
     return y;
 }
 
+/**
+ * Corrects the Rs/Ro ratio based on temperature and humidity using three curves.
+ * @param x The temperature value.
+ * @param H The humidity value.
+ * @param curve40 The curve for 40% humidity.
+ * @param curve65 The curve for 65% humidity.
+ * @param curve85 The curve for 85% humidity.
+ * @return The corrected Rs/Ro ratio.
+ */
 float RsRoCorrection3Curve(float x, float H, float *curve40, float *curve65, float *curve85)
 {
     // Coefficients for humidity 40%
@@ -347,9 +428,13 @@ float RsRoCorrection3Curve(float x, float H, float *curve40, float *curve65, flo
     return y;
 }
 
+/**
+ * Reads the CO2 concentration from the NDIR sensor.
+ * @param sensorIn The pin number of the NDIR sensor.
+ * @return The CO2 concentration in PPM.
+ */
 long readNDIRCO2(int sensorIn)
 {
-
     long ppmco2 = 0;
     // Read voltage
     int sensorValue = analogRead(sensorIn);
