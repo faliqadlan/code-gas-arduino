@@ -37,8 +37,8 @@ void setup()
         // rtc.adjust(DateTime(2023, 10, 10, 12, 0, 0));
     }
 
-    DateTime now = rtc.now();
-    sprintf(filename, "%04d%02d%02d_%02d%02d%02d.txt", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+    // Set filename to arduino.txt
+    strcpy(filename, "arduino.txt");
     Serial.print(F("Generated filename: "));
     Serial.println(filename);
 
@@ -56,6 +56,7 @@ void setup()
     {
         myFile.println("Logger started");
         myFile.close();
+        Serial.println(F("Setup file created and closed successfully."));
     }
     else
     {
@@ -72,6 +73,7 @@ void loop()
     if (!myFile)
     {
         // Try creating the file if it doesn't exist
+        Serial.println(F("Error opening file in loop, trying to create it."));
         myFile = SD.open(filename, FILE_WRITE | O_CREAT);
     }
 
@@ -91,10 +93,28 @@ void loop()
         myFile.print(now.second(), DEC);
         myFile.println(" - Logging data");
         myFile.close();
+        Serial.println(F("Data logged successfully."));
     }
     else
     {
         Serial.print(F("SD Card: error on opening file "));
+        Serial.println(filename);
+    }
+
+    // Open file for reading
+    myFile = SD.open(filename, FILE_READ);
+    if (myFile)
+    {
+        Serial.println(F("Reading file content:"));
+        while (myFile.available())
+        {
+            Serial.write(myFile.read());
+        }
+        myFile.close();
+    }
+    else
+    {
+        Serial.print(F("SD Card: error on opening file for reading "));
         Serial.println(filename);
     }
 
