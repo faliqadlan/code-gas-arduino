@@ -6,7 +6,7 @@
 
 File myFile;
 RTC_DS3231 rtc;
-char filename[20];
+char filename[25];
 
 void setup()
 {
@@ -37,8 +37,9 @@ void setup()
         // rtc.adjust(DateTime(2023, 10, 10, 12, 0, 0));
     }
 
-    // Set filename to arduino.txt
-    strcpy(filename, "arduino.txt");
+    // Generate filename based on current date and time
+    DateTime now = rtc.now();
+    sprintf(filename, "%04d%02d%02d_%02d%02d%02d.txt", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
     Serial.print(F("Generated filename: "));
     Serial.println(filename);
 
