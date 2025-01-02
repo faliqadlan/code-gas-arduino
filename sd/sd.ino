@@ -1,63 +1,61 @@
-#include <SPI.h>
+/*
+ * Created by ArduinoGetStarted.com
+ *
+ * This example code is in the public domain
+ *
+ * Tutorial page: https://arduinogetstarted.com/tutorials/arduino-micro-sd-card
+ */
+
 #include <SD.h>
 
-const int chipSelect = 10;
+#define PIN_SPI_CS 4
+
+File myFile;
 
 void setup()
 {
     Serial.begin(9600);
-    while (!Serial)
+
+    if (!SD.begin(PIN_SPI_CS))
     {
-        ; // wait for serial port to connect. Needed for native USB port only
+        Serial.println(F("SD CARD FAILED, OR NOT PRESENT!"));
+        while (1)
+            ; // don't do anything more:
     }
 
-    Serial.print("Initializing SD card...");
+    Serial.println(F("SD CARD INITIALIZED."));
 
-    if (!SD.begin(chipSelect))
+    // open file for writing
+    myFile = SD.open("arduino.txt", FILE_WRITE);
+
+    if (myFile)
     {
-        Serial.println("initialization failed!");
-        return;
-    }
-    Serial.println("initialization done.");
-
-    // Open a file for writing
-    File dataFile = SD.open("example.txt", FILE_WRITE);
-
-    // If the file opened okay, write to it:
-    if (dataFile)
-    {
-        Serial.println("Writing to example.txt...");
-        dataFile.println("Hello, world!");
-        dataFile.close();
-        Serial.println("done.");
+        myFile.println("Created by ArduinoGetStarted.com"); // write a line to Arduino
+        myFile.println("Learn Arduino and SD Card");        // write another  line to Arduino
+        myFile.close();
     }
     else
     {
-        // If the file didn't open, print an error:
-        Serial.println("error opening example.txt");
+        Serial.print(F("SD Card: error on opening file arduino.txt"));
     }
 
-    // Re-open the file for reading:
-    dataFile = SD.open("example.txt");
-    if (dataFile)
+    // open file for reading
+    myFile = SD.open("arduino.txt", FILE_READ);
+    if (myFile)
     {
-        Serial.println("example.txt:");
-
-        // Read from the file until there's nothing else in it:
-        while (dataFile.available())
+        while (myFile.available())
         {
-            Serial.write(dataFile.read());
+            char ch = myFile.read(); // read characters one by one from Micro SD Card
+            Serial.print(ch);        // print the character to Serial Monitor
         }
-        dataFile.close();
+        myFile.close();
     }
     else
     {
-        // If the file didn't open, print an error:
-        Serial.println("error opening example.txt");
+        Serial.print(F("SD Card: error on opening file arduino.txt"));
     }
 }
 
 void loop()
 {
-    // nothing happens after setup
 }
