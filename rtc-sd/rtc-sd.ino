@@ -6,7 +6,7 @@
 
 File myFile;
 RTC_DS3231 rtc;
-char filename[25];
+char filename[13];
 
 void setup()
 {
@@ -39,7 +39,9 @@ void setup()
 
     // Generate filename based on current date and time
     DateTime now = rtc.now();
-    sprintf(filename, "%04d%02d%02d_%02d%02d%02d.txt", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
+    // filename length is 8.3 (8 characters for the name and 3 for the extension)
+    // mmddhhmm.txt = 8 characters
+    sprintf(filename, "%02d%02d%02d%02d.txt", now.month(), now.day(), now.hour(), now.minute());
     Serial.print(F("Generated filename: "));
     Serial.println(filename);
 
