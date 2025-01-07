@@ -1,57 +1,65 @@
 #include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <RTClib.h>
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET -1
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 RTC_DS3231 rtc;
 
-const int S0 = 2;
-const int S1 = 3;
-const int S2 = 4;
-const int S3 = 5;
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define SCREEN_ADDRESS 0x3C
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 void setup()
 {
-    pinMode(S0, OUTPUT);
-    pinMode(S1, OUTPUT);
-    pinMode(S2, OUTPUT);
-    pinMode(S3, OUTPUT);
-
-    Wire.begin();
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-    rtc.begin();
     Serial.begin(9600);
-    Serial.println("Setup complete");
+    if (!rtc.begin())
+    {
+        Serial.println("Couldn't find RTC");
+        while (1)
+            ;
+    }
+
+    if (rtc.lostPower())
+    {
+        Serial.println("RTC lost power, let's set the time!");
+        // The following line sets the RTC to the date & time this sketch was compiled
+        rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+        // Uncomment the following line to set the date & time manually
+        // rtc.adjust(DateTime(2023, 10, 10, 12, 0, 0));
+    }
+
+    if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
+    {
+        Serial.println(F("SSD1306 allocation failed"));
+        for (;;)
+            ;
+    }
+
+    display.clearDisplay();
+    Serial.println("Display initialized");
 }
 
 void loop()
 {
-    // Pilih saluran RTC
-    Serial.println("Selecting RTC channel");
-    digitalWrite(S0, LOW);
-    digitalWrite(S1, LOW);
-    digitalWrite(S2, LOW);
-    digitalWrite(S3, LOW);
-
     DateTime now = rtc.now();
-    Serial.print("Current time: ");
+
+    Serial.print(now.year(), DEC);
+    Serial.print('/');
+    Serial.print(now.month(), DEC);
+    Serial.print('/');
+    Serial.print(now.day(), DEC);
+    Serial.print(" ");
     Serial.print(now.hour(), DEC);
     Serial.print(':');
     Serial.print(now.minute(), DEC);
     Serial.print(':');
-    Serial.println(now.second(), DEC);
-
-    // Pilih saluran OLED
-    Serial.println("Selecting OLED channel");
-    digitalWrite(S0, HIGH);
-    digitalWrite(S1, LOW);
-    digitalWrite(S2, LOW);
-    digitalWrite(S3, LOW);
+    Serial.print(now.second(), DEC);
+    Serial.println();
 
     display.clearDisplay();
     display.setTextSize(1);
