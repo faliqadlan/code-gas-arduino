@@ -60,9 +60,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 File myFile;
 char filename[13];
 
-float Ro_MQ_135 = 10;
-float Ro_MQ_136 = 10;
-float Ro_TGS_2602 = 10;
+float Ro_MQ_135 = 0;
+float Ro_MQ_136 = 0;
+float Ro_TGS_2602 = 0;
 
 bool isCalibrating = false;
 bool isMeasuring = false;
