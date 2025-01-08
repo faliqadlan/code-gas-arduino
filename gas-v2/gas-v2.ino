@@ -108,20 +108,30 @@ void setup()
     EEPROM.get(sizeof(float), Ro_MQ_136);
     EEPROM.get(2 * sizeof(float), Ro_TGS_2602);
 
-    int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
-    Serial.print("Calibrating gas sensor in ");
-    Serial.print(timeCal * 3);
-    Serial.println(" seconds");
-    Serial.println("Calibrating MQ135");
-    Ro_MQ_135 = MQ135Calibration();
+    if (Ro_MQ_135 == 0 || Ro_MQ_136 == 0 || Ro_TGS_2602 == 0)
+    {
+        int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
+        Serial.print("Calibrating gas sensor in ");
+        Serial.print(timeCal * 3);
+        Serial.println(" seconds");
 
-    Serial.println("Calibrating MQ136");
-    Ro_MQ_136 = MQ136Calibration();
+        Serial.println("Calibrating MQ135");
+        Ro_MQ_135 = MQ135Calibration();
+        EEPROM.put(0, Ro_MQ_135);
+        displayCalibrationResult("MQ135", Ro_MQ_135 / RL_MQ_135);
 
-    Serial.println("Calibrating TGS2602");
-    Ro_TGS_2602 = TGS2602Calibration();
+        Serial.println("Calibrating MQ136");
+        Ro_MQ_136 = MQ136Calibration();
+        EEPROM.put(sizeof(float), Ro_MQ_136);
+        displayCalibrationResult("MQ136", Ro_MQ_136 / RL_MQ_136);
 
-    Serial.println("Calibration is done...\n");
+        Serial.println("Calibrating TGS2602");
+        Ro_TGS_2602 = TGS2602Calibration();
+        EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
+        displayCalibrationResult("TGS2602", Ro_TGS_2602 / RL_TGS_2602);
+
+        Serial.println("Calibration is done...\n");
+    }
 
     Serial.print("Ro MQ135=");
     Serial.print(Ro_MQ_135 / RL_MQ_135);
@@ -174,7 +184,7 @@ void calibrateSensors()
     Serial.println("Calibration is done...\n");
 }
 
-void displayCalibrationResult(const char* sensor, float value)
+void displayCalibrationResult(const char *sensor, float value)
 {
     display.clearDisplay();
     display.setCursor(0, 0);
