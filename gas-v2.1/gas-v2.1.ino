@@ -270,7 +270,6 @@ void logAndDisplayResults(float tempC, float humi, long ppmCo2Mq135, long ppmco2
     display.print(" ppm");
     display.display();
     delay(3000); // Display result for 3 seconds
-    delay(3000);
 }
 
 float MQ135GetPPM(float x, float H)
