@@ -688,6 +688,8 @@ void logToSD(const char* message, float value)
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
+            myFile.print(now.timestamp());
+            myFile.print(" - ");
             myFile.print(message);
             myFile.println(value);
             myFile.close();
@@ -704,6 +706,8 @@ void logToSD(const char* message)
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
+            myFile.print(now.timestamp());
+            myFile.print(" - ");
             myFile.println(message);
             myFile.close();
         }
