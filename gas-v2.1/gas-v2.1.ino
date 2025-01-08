@@ -60,9 +60,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 File myFile;
 char filename[13];
 
-float Ro_MQ_135 = 10;
-float Ro_MQ_136 = 10;
-float Ro_TGS_2602 = 10;
+float Ro_MQ_135 = 0;
+float Ro_MQ_136 = 0;
+float Ro_TGS_2602 = 0;
 
 bool isCalibrating = false;
 bool isMeasuring = false;
@@ -101,12 +101,12 @@ void initializeRTC()
 {
     if (!rtc.begin())
     {
-        Serial.println("Couldn't find RTC");
+        Serial.println(F("Couldn't find RTC"));
     }
 
     if (rtc.lostPower())
     {
-        Serial.println("RTC lost power, let's set the time!");
+        Serial.println(F("RTC lost power, let's set the time!"));
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 }
@@ -118,7 +118,7 @@ void initializeDisplay()
         Serial.println(F("SSD1306 allocation failed"));
     }
     display.clearDisplay();
-    Serial.println("Display initialized");
+    Serial.println(F("Display initialized"));
 }
 
 void initializePins()
@@ -146,48 +146,48 @@ void loadCalibrationValues()
 
 void printCalibrationValues()
 {
-    Serial.print("Ro MQ135=");
+    Serial.print(F("Ro MQ135="));
     Serial.print(Ro_MQ_135 / RL_MQ_135);
-    Serial.println("kohm");
+    Serial.println(F("kohm"));
 
-    Serial.print("Ro MQ136=");
+    Serial.print(F("Ro MQ136="));
     Serial.print(Ro_MQ_136 / RL_MQ_136);
-    Serial.println("kohm");
+    Serial.println(F("kohm"));
 
-    Serial.print("Ro TGS2602=");
+    Serial.print(F("Ro TGS2602="));
     Serial.print(Ro_TGS_2602 / RL_TGS_2602);
-    Serial.println("kohm");
+    Serial.println(F("kohm"));
 }
 
 void calibrateSensors()
 {
-    Ro_MQ_135 = calibrateSensor(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, "MQ135");
+    Ro_MQ_135 = calibrateSensor(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, F("MQ135"));
     EEPROM.put(0, Ro_MQ_135);
 
-    Ro_MQ_136 = calibrateSensor(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136, "MQ136");
+    Ro_MQ_136 = calibrateSensor(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136, F("MQ136"));
     EEPROM.put(sizeof(float), Ro_MQ_136);
 
-    Ro_TGS_2602 = calibrateSensor(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, "TGS2602");
+    Ro_TGS_2602 = calibrateSensor(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, F("TGS2602"));
     EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
 
-    Serial.println("Calibration is done...\n");
+    Serial.println(F("Calibration is done...\n"));
 }
 
-float calibrateSensor(int pin, float cleanAirFactor, int rlValue, const char *sensorName)
+float calibrateSensor(int pin, float cleanAirFactor, int rlValue, const __FlashStringHelper *sensorName)
 {
     float val = MQCalibration(pin, cleanAirFactor, rlValue);
     displayCalibrationResult(sensorName, val / rlValue);
     return val;
 }
 
-void displayCalibrationResult(const char *sensor, float value)
+void displayCalibrationResult(const __FlashStringHelper *sensor, float value)
 {
     display.clearDisplay();
     display.setCursor(0, 0);
     display.print(sensor);
-    display.print(" Ro=");
+    display.print(F(" Ro="));
     display.print(value);
-    display.println(" kohm");
+    display.println(F(" kohm"));
     display.display();
     delay(2000); // Display result for 2 seconds
 }
@@ -196,7 +196,7 @@ void measureAndLog()
 {
     if (Ro_MQ_135 == 0 || Ro_MQ_136 == 0 || Ro_TGS_2602 == 0)
     {
-        Serial.println("Calibration values not found. Please calibrate first.");
+        Serial.println(F("Calibration values not found. Please calibrate first."));
         return;
     }
 
@@ -212,19 +212,19 @@ void measureAndLog()
 
 void logAndDisplayResults(float tempC, float humi, long ppmCo2Mq135, long ppmco2ndir, long ppmH2sMq136, long ppmH2sTgs2602)
 {
-    Serial.print("Temperature: ");
+    Serial.print(F("Temp: "));
     Serial.print(tempC);
-    Serial.print(" C, Humidity: ");
+    Serial.print(F(" C, Hum: "));
     Serial.print(humi);
-    Serial.print(" %, CO2 (MQ135): ");
+    Serial.print(F(" %, CO2 (MQ135): "));
     Serial.print(ppmCo2Mq135);
-    Serial.print(" ppm, CO2 (NDIR): ");
+    Serial.print(F(" ppm, CO2 (NDIR): "));
     Serial.print(ppmco2ndir);
-    Serial.print(" ppm, H2S (MQ136): ");
+    Serial.print(F(" ppm, H2S (MQ136): "));
     Serial.print(ppmH2sMq136);
-    Serial.print(" ppm, H2S (TGS2602): ");
+    Serial.print(F(" ppm, H2S (TGS2602): "));
     Serial.print(ppmH2sTgs2602);
-    Serial.println(" ppm");
+    Serial.println(F(" ppm"));
 
     if (SD.begin(PIN_SPI_CS))
     {
@@ -233,41 +233,41 @@ void logAndDisplayResults(float tempC, float humi, long ppmCo2Mq135, long ppmco2
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
-            myFile.print("Start Measure Time: ");
+            myFile.print(F("Start Measure Time: "));
             myFile.print(now.timestamp());
             myFile.println();
-            myFile.print("Temperature: ");
+            myFile.print(F("Temp: "));
             myFile.print(tempC);
-            myFile.print(" C, Humidity: ");
+            myFile.print(F(" C, Hum: "));
             myFile.print(humi);
-            myFile.print(" %, CO2 (MQ135): ");
+            myFile.print(F(" %, CO2 (MQ135): "));
             myFile.print(ppmCo2Mq135);
-            myFile.print(" ppm, CO2 (NDIR): ");
+            myFile.print(F(" ppm, CO2 (NDIR): "));
             myFile.print(ppmco2ndir);
-            myFile.print(" ppm, H2S (MQ136): ");
+            myFile.print(F(" ppm, H2S (MQ136): "));
             myFile.print(ppmH2sMq136);
-            myFile.print(" ppm, H2S (TGS2602): ");
+            myFile.print(F(" ppm, H2S (TGS2602): "));
             myFile.print(ppmH2sTgs2602);
-            myFile.println(" ppm");
+            myFile.println(F(" ppm"));
             myFile.close();
         }
     }
 
     display.clearDisplay();
     display.setCursor(0, 0);
-    display.print("Temp: ");
+    display.print(F("Temp: "));
     display.print(tempC);
-    display.print(" C\nHum: ");
+    display.print(F(" C\nHum: "));
     display.print(humi);
-    display.print(" %\nCO2 (MQ135): ");
+    display.print(F(" %\nCO2 (MQ135): "));
     display.print(ppmCo2Mq135);
-    display.print(" ppm\nCO2 (NDIR): ");
+    display.print(F(" ppm\nCO2 (NDIR): "));
     display.print(ppmco2ndir);
-    display.print(" ppm\nH2S (MQ136): ");
+    display.print(F(" ppm\nH2S (MQ136): "));
     display.print(ppmH2sMq136);
-    display.print(" ppm\nH2S (TGS2602): ");
+    display.print(F(" ppm\nH2S (TGS2602): "));
     display.print(ppmH2sTgs2602);
-    display.print(" ppm");
+    display.print(F(" ppm"));
     display.display();
     delay(3000); // Display result for 3 seconds
 }
@@ -298,19 +298,7 @@ float getPPM(int pin, int rlValue, float ro, float x, float H, const float *curv
         rs_ro_corr = RsRoCorrection3Curve(x, H, curve33, curve65, curve85);
     }
 
-    Serial.print("Sensor rs_ro before correction: ");
-    Serial.println(rs_ro);
-    logToSD("Sensor rs_ro before correction: ", rs_ro);
-
-    Serial.print("Sensor rs_ro_corr: ");
-    Serial.println(rs_ro_corr);
-    logToSD("Sensor rs_ro_corr: ", rs_ro_corr);
-
     rs_ro = rs_ro / rs_ro_corr;
-
-    Serial.print("Sensor rs_ro after correction: ");
-    Serial.println(rs_ro);
-    logToSD("Sensor rs_ro after correction: ", rs_ro);
 
     return MQGetGasPercentage(rs_ro, gasId);
 }
@@ -405,37 +393,37 @@ long readNDIRCO2(int sensorIn)
     int sensorValue = analogRead(sensorIn);
     float voltage = sensorValue * (5000.0 / 1023.0);
 
-    Serial.print("NDIR Sensor: ");
+    Serial.print(F("NDIR Sensor: "));
     Serial.println(sensorValue);
-    logToSD("NDIR Sensor: ", sensorValue);
+    logToSD(F("NDIR Sensor: "), sensorValue);
 
-    Serial.print("NDIR Voltage: ");
+    Serial.print(F("NDIR Voltage: "));
     Serial.println(voltage);
-    logToSD("NDIR Voltage: ", voltage);
+    logToSD(F("NDIR Voltage: "), voltage);
 
     if (voltage == 0)
     {
-        Serial.println("NDIR Fault");
-        logToSD("NDIR Fault");
+        Serial.println(F("NDIR Fault"));
+        logToSD(F("NDIR Fault"));
     }
     else if (voltage < 400)
     {
-        Serial.println("NDIR Preheating");
-        logToSD("NDIR Preheating");
+        Serial.println(F("NDIR Preheating"));
+        logToSD(F("NDIR Preheating"));
     }
     else if (voltage > 2000)
     {
-        Serial.println("NDIR Exceeding measurement range");
-        logToSD("NDIR Exceeding measurement range");
+        Serial.println(F("NDIR Exceeding measurement range"));
+        logToSD(F("NDIR Exceeding measurement range"));
     }
     else
     {
         int voltage_difference = voltage - 400;
         float concentration = voltage_difference * 50.0 / 16.0;
-        Serial.print("NDIR Voltage: ");
+        Serial.print(F("NDIR Voltage: "));
         Serial.print(voltage);
-        Serial.println(" mv");
-        logToSD("NDIR Voltage: ", voltage);
+        Serial.println(F(" mv"));
+        logToSD(F("NDIR Voltage: "), voltage);
 
         ppmco2 = (long)concentration;
     }
@@ -443,7 +431,7 @@ long readNDIRCO2(int sensorIn)
     return ppmco2;
 }
 
-void logToSD(const char *message, float value)
+void logToSD(const __FlashStringHelper *message, float value)
 {
     if (SD.begin(PIN_SPI_CS))
     {
@@ -453,7 +441,7 @@ void logToSD(const char *message, float value)
         if (myFile)
         {
             myFile.print(now.timestamp());
-            myFile.print(" - ");
+            myFile.print(F(" - "));
             myFile.print(message);
             myFile.println(value);
             myFile.close();
@@ -461,7 +449,7 @@ void logToSD(const char *message, float value)
     }
 }
 
-void logToSD(const char *message)
+void logToSD(const __FlashStringHelper *message)
 {
     if (SD.begin(PIN_SPI_CS))
     {
@@ -471,7 +459,7 @@ void logToSD(const char *message)
         if (myFile)
         {
             myFile.print(now.timestamp());
-            myFile.print(" - ");
+            myFile.print(F(" - "));
             myFile.println(message);
             myFile.close();
         }
