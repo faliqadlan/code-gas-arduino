@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "gas-v2\\gas-v2.ino",
+    "sketch": "gas-v2.1\\gas-v2.1.ino",
     "port": "COM8"
 }
