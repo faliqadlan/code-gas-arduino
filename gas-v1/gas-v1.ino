@@ -1,10 +1,10 @@
 #include "DHT.h"
 #define DHT11_PIN 2
 
-#define MQ_135_PIN PIN_A1                // Define the analog pin A1 for MQ135 sensor
+#define MQ_135_PIN PIN_A0                // Define the analog pin A1 for MQ135 sensor
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor
-#define TGS_2602_PIN PIN_A3              // Define the analog pin A3 for TGS2602 sensor
-#define NDIR_PIN PIN_A4                  // Define the analog pin A4 for NDIR sensor
+#define TGS_2602_PIN PIN_A1              // Define the analog pin A3 for TGS2602 sensor
+#define NDIR_PIN PIN_A3                  // Define the analog pin A4 for NDIR sensor
 int RL_MQ_135 = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_MQ_136 = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_TGS_2602 = 4700;                  // Define the load resistance on the board, in kilo ohms

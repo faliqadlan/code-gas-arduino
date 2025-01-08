@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "multiplexer\\multiplexer.ino",
-    "port": "COM5"
+    "sketch": "gas-v2\\gas-v2.ino",
+    "port": "COM8"
 }

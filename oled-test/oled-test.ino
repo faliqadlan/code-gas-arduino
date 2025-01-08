@@ -21,10 +21,11 @@ void setup()
     Serial.begin(9600);
     Serial.println("Initializing...");
 
+    Serial.println(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS) ? F("SSD1306 allocation failed") : F("Display initialized"));
+
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
     {
         Serial.println(F("SSD1306 allocation failed"));
-        for (;;);
     }
 
     display.clearDisplay();
