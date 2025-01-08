@@ -265,7 +265,7 @@ void measureAndLog()
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
-            myFile.print("Time: ");
+            myFile.print("Start Measure Time: ");
             myFile.print(now.timestamp());
             myFile.println();
             myFile.print("Temperature: ");
@@ -364,14 +364,17 @@ float MQ135GetPPM(float x, float H)
 
     Serial.print("MQ135 rs_ro before correction: ");
     Serial.println(rs_ro);
+    logToSD("MQ135 rs_ro before correction: ", rs_ro);
 
     Serial.print("MQ135 rs_ro_corr: ");
     Serial.println(rs_ro_corr);
+    logToSD("MQ135 rs_ro_corr: ", rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
     Serial.print("MQ135 rs_ro after correction: ");
     Serial.println(rs_ro);
+    logToSD("MQ135 rs_ro after correction: ", rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, CO2_MQ135);
 
@@ -398,14 +401,17 @@ float MQ136GetPPM(float x, float H)
 
     Serial.print("MQ136 rs_ro before correction: ");
     Serial.println(rs_ro);
+    logToSD("MQ136 rs_ro before correction: ", rs_ro);
 
     Serial.print("MQ136 rs_ro_corr: ");
     Serial.println(rs_ro_corr);
+    logToSD("MQ136 rs_ro_corr: ", rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
     Serial.print("MQ136 rs_ro after correction: ");
     Serial.println(rs_ro);
+    logToSD("MQ136 rs_ro after correction: ", rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_MQ136);
 
@@ -432,14 +438,17 @@ float TGS2602GetPPM(float x, float H)
 
     Serial.print("TGS2602 rs_ro before correction: ");
     Serial.println(rs_ro);
+    logToSD("TGS2602 rs_ro before correction: ", rs_ro);
 
     Serial.print("TGS2602 rs_ro_corr: ");
     Serial.println(rs_ro_corr);
+    logToSD("TGS2602 rs_ro_corr: ", rs_ro_corr);
 
     rs_ro = rs_ro / rs_ro_corr;
 
     Serial.print("TGS2602 rs_ro after correction: ");
     Serial.println(rs_ro);
+    logToSD("TGS2602 rs_ro after correction: ", rs_ro);
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_TGS2602);
 
@@ -633,20 +642,26 @@ long readNDIRCO2(int sensorIn)
 
     Serial.print("NDIR Sensor: ");
     Serial.println(sensorValue);
+    logToSD("NDIR Sensor: ", sensorValue);
+
     Serial.print("NDIR Voltage: ");
     Serial.println(voltage);
+    logToSD("NDIR Voltage: ", voltage);
 
     if (voltage == 0)
     {
         Serial.println("NDIR Fault");
+        logToSD("NDIR Fault");
     }
     else if (voltage < 400)
     {
         Serial.println("NDIR Preheating");
+        logToSD("NDIR Preheating");
     }
     else if (voltage > 2000)
     {
         Serial.println("NDIR Exceeding measurement range");
+        logToSD("NDIR Exceeding measurement range");
     }
     else
     {
@@ -656,9 +671,41 @@ long readNDIRCO2(int sensorIn)
         Serial.print("NDIR Voltage: ");
         Serial.print(voltage);
         Serial.println(" mv");
+        logToSD("NDIR Voltage: ", voltage);
 
         ppmco2 = (long)concentration;
     }
 
     return ppmco2;
+}
+
+void logToSD(const char* message, float value)
+{
+    if (SD.begin(PIN_SPI_CS))
+    {
+        DateTime now = rtc.now();
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
+        myFile = SD.open(filename, FILE_WRITE);
+        if (myFile)
+        {
+            myFile.print(message);
+            myFile.println(value);
+            myFile.close();
+        }
+    }
+}
+
+void logToSD(const char* message)
+{
+    if (SD.begin(PIN_SPI_CS))
+    {
+        DateTime now = rtc.now();
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
+        myFile = SD.open(filename, FILE_WRITE);
+        if (myFile)
+        {
+            myFile.println(message);
+            myFile.close();
+        }
+    }
 }
