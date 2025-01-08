@@ -112,8 +112,13 @@ void setup()
     {
         int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
         Serial.print("Calibrating gas sensor in ");
+        display.print("Calibrating gas sensor in ");
         Serial.print(timeCal * 3);
+        display.print(timeCal * 3);
         Serial.println(" seconds");
+        display.println(" seconds");
+        delay(1000);
+        display.clearDisplay();
 
         Serial.println("Calibrating MQ135");
         Ro_MQ_135 = MQ135Calibration();
