@@ -7,10 +7,10 @@
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
 
-#define DHT11_PIN 2
-#define PIN_SPI_CS 4
-#define CalibrationButton 5
-#define MeasurementButton 6
+#define DHT11_PIN 48
+#define PIN_SPI_CS 53
+#define CalibrationButton 46
+#define MeasurementButton 47
 
 #define MQ_135_PIN PIN_A0                // Define the analog pin A1 for MQ135 sensor
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor

@@ -8,10 +8,10 @@
 #include <EEPROM.h>
 
 // Constants
-#define DHT11_PIN 2
-#define PIN_SPI_CS 4
-#define CalibrationButton 5
-#define MeasurementButton 6
+#define DHT11_PIN 48
+#define PIN_SPI_CS 53
+#define CalibrationButton 46
+#define MeasurementButton 47
 
 #define MQ_135_PIN PIN_A0
 #define MQ_136_PIN PIN_A2
