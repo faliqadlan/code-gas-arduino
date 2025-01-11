@@ -7,8 +7,8 @@
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
 
-#define DHT11_PIN 47
-#define PIN_SPI_CS 53
+#define DHT11_PIN 46
+#define PIN_SPI_CS 47
 #define CalibrationButton 49
 #define MeasurementButton 48
 
@@ -140,6 +140,10 @@ void setup()
         display.clearDisplay();
     }
 
+    saveCalibrationToSD("MQ135", Ro_MQ_135 / R1000kohm);
+    saveCalibrationToSD("MQ136", Ro_MQ_136 / R1000kohm);
+    saveCalibrationToSD("TGS2602", Ro_TGS_2602 / R1000kohm);
+
     Serial.print("Ro MQ135=");
     Serial.print(Ro_MQ_135 / R1000kohm);
     Serial.println("kohm");
@@ -186,14 +190,17 @@ void calibrateSensors()
     Ro_MQ_135 = MQ135Calibration();
     EEPROM.put(0, Ro_MQ_135);
     displayCalibrationResult("MQ135", Ro_MQ_135 / R1000kohm);
+    saveCalibrationToSD("MQ135", Ro_MQ_135 / R1000kohm);
 
     Ro_MQ_136 = MQ136Calibration();
     EEPROM.put(sizeof(float), Ro_MQ_136);
     displayCalibrationResult("MQ136", Ro_MQ_136 / R1000kohm);
+    saveCalibrationToSD("MQ136", Ro_MQ_136 / R1000kohm);
 
     Ro_TGS_2602 = TGS2602Calibration();
     EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
     displayCalibrationResult("TGS2602", Ro_TGS_2602 / R1000kohm);
+    saveCalibrationToSD("TGS2602", Ro_TGS_2602 / R1000kohm);
 
     display.clearDisplay();
     display.setCursor(0, 0);
@@ -283,7 +290,7 @@ void measureAndLog()
         display.display();
         delay(5000); // Display result for 1 second
 
-        if (i == totalcount-1)
+        if (i == totalcount - 1)
         {
             delay(10000); // Delay for 10 seconds on the last iteration
         }
@@ -315,7 +322,7 @@ void measureAndLog()
         if (SD.begin(PIN_SPI_CS))
         {
             DateTime now = rtc.now();
-            snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
+            snprintf(filename, sizeof(filename), "%02d%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour(), now.minute());
             myFile = SD.open(filename, FILE_WRITE);
             if (myFile)
             {
@@ -342,7 +349,20 @@ void measureAndLog()
                 myFile.print(", Analog NDIR: ");
                 myFile.println(analogNDIR);
                 myFile.close();
+
+                // Log success message
+                Serial.println("Data written to SD card successfully.");
             }
+            else
+            {
+                // Log failure message
+                Serial.println("Failed to open file for writing.");
+            }
+        }
+        else
+        {
+            // Log failure message
+            Serial.println("SD card initialization failed.");
         }
     }
 }
@@ -723,7 +743,7 @@ void logToSD(const char *message, float value)
     if (SD.begin(PIN_SPI_CS))
     {
         DateTime now = rtc.now();
-        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour(), now.minute());
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
@@ -732,7 +752,20 @@ void logToSD(const char *message, float value)
             myFile.print(message);
             myFile.println(value);
             myFile.close();
+
+            // Log success message
+            Serial.println("Data written to SD card successfully.");
         }
+        else
+        {
+            // Log failure message
+            Serial.println("Failed to open file for writing.");
+        }
+    }
+    else
+    {
+        // Log failure message
+        Serial.println("SD card initialization failed.");
     }
 }
 
@@ -741,7 +774,7 @@ void logToSD(const char *message)
     if (SD.begin(PIN_SPI_CS))
     {
         DateTime now = rtc.now();
-        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour(), now.minute());
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
@@ -749,7 +782,49 @@ void logToSD(const char *message)
             myFile.print(" - ");
             myFile.println(message);
             myFile.close();
+
+            // Log success message
+            Serial.println("Data written to SD card successfully.");
         }
+        else
+        {
+            // Log failure message
+            Serial.println("Failed to open file for writing.");
+        }
+    }
+    else
+    {
+        // Log failure message
+        Serial.println("SD card initialization failed.");
+    }
+}
+
+void saveCalibrationToSD(const char *sensor, float value)
+{
+    if (SD.begin(PIN_SPI_CS))
+    {
+        DateTime now = rtc.now();
+        snprintf(filename, sizeof(filename), "calibration.txt");
+        myFile = SD.open(filename, FILE_WRITE);
+        if (myFile)
+        {
+            myFile.print(now.timestamp());
+            myFile.print(" - ");
+            myFile.print(sensor);
+            myFile.print(" Ro=");
+            myFile.print(value);
+            myFile.println(" kohm");
+            myFile.close();
+            Serial.println("Calibration data written to SD card successfully.");
+        }
+        else
+        {
+            Serial.println("Failed to open file for writing calibration data.");
+        }
+    }
+    else
+    {
+        Serial.println("SD card initialization failed.");
     }
 }
 
