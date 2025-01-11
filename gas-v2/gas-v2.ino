@@ -319,56 +319,21 @@ void measureAndLog()
         display.display();
         delay(5000); // Display result for 1 second
 
-        if (i == totalcount-1)
+        if (i == totalcount - 1)
         {
             delay(10000); // Delay for 10 seconds on the last iteration
         }
 
-        if (SD.begin(PIN_SPI_CS))
-        {
-            DateTime now = rtc.now();
-            snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
-            myFile = SD.open(filename, FILE_WRITE);
-            if (myFile)
-            {
-                myFile.print("Time: ");
-                myFile.print(now.timestamp());
-                myFile.print(", Temp: ");
-                myFile.print(tempC);
-                myFile.print(" C, Hum: ");
-                myFile.print(humi);
-                myFile.print(" %, CO2 (MQ135): ");
-                myFile.print(ppmCo2Mq135);
-                myFile.print(" ppm, CO2 (NDIR): ");
-                myFile.print(ppmco2ndir);
-                myFile.print(" ppm, H2S (MQ136): ");
-                myFile.print(ppmH2sMq136);
-                myFile.print(" ppm, H2S (TGS2602): ");
-                myFile.print(ppmH2sTgs2602);
-                myFile.print(" ppm, Analog MQ135: ");
-                myFile.print(analogMQ135);
-                myFile.print(", Analog MQ136: ");
-                myFile.print(analogMQ136);
-                myFile.print(", Analog TGS2602: ");
-                myFile.println(analogTGS2602);
-                myFile.print(", Analog NDIR: ");
-                myFile.println(analogNDIR);
-                myFile.close();
-
-                // Log success message
-                Serial.println("Data written to SD card successfully.");
-            }
-            else
-            {
-                // Log failure message
-                Serial.println("Failed to open file for writing.");
-            }
-        }
-        else
-        {
-            // Log failure message
-            Serial.println("SD card initialization failed.");
-        }
+        logToSD("Temp: ", tempC);
+        logToSD("Hum: ", humi);
+        logToSD("PPM CO2 (MQ135): ", ppmCo2Mq135);
+        logToSD("PPM CO2 (NDIR): ", ppmco2ndir);
+        logToSD("PPM H2S (MQ136): ", ppmH2sMq136);
+        logToSD("PPM H2S (TGS2602): ", ppmH2sTgs2602);
+        logToSD("Analog MQ135: ", analogMQ135);
+        logToSD("Analog MQ136: ", analogMQ136);
+        logToSD("Analog TGS2602: ", analogTGS2602);
+        logToSD("Analog NDIR: ", analogNDIR);
     }
 }
 
