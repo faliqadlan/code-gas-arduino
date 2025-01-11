@@ -317,9 +317,9 @@ void measureAndLog()
         display.print(" ppm\nCount left: ");
         display.print(totalcount - i);
         display.display();
-        delay(1000); // Display result for 1 second
+        delay(5000); // Display result for 1 second
 
-        if (i == 59)
+        if (i == totalcount-1)
         {
             delay(10000); // Delay for 10 seconds on the last iteration
         }
@@ -327,7 +327,7 @@ void measureAndLog()
         if (SD.begin(PIN_SPI_CS))
         {
             DateTime now = rtc.now();
-            snprintf(filename, sizeof(filename), "%02d%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour(), now.minute());
+            snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
             myFile = SD.open(filename, FILE_WRITE);
             if (myFile)
             {
@@ -748,7 +748,7 @@ void logToSD(const char *message, float value)
     if (SD.begin(PIN_SPI_CS))
     {
         DateTime now = rtc.now();
-        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour(), now.minute());
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
@@ -779,7 +779,7 @@ void logToSD(const char *message)
     if (SD.begin(PIN_SPI_CS))
     {
         DateTime now = rtc.now();
-        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour(), now.minute());
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
@@ -809,7 +809,7 @@ void saveCalibrationToSD(const char *sensor, float value)
     if (SD.begin(PIN_SPI_CS))
     {
         DateTime now = rtc.now();
-        snprintf(filename, sizeof(filename), "calibration.txt");
+        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
         myFile = SD.open(filename, FILE_WRITE);
         if (myFile)
         {
