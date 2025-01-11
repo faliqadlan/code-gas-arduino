@@ -288,6 +288,9 @@ void measureAndLog()
         display.print(analogMQ136);
         display.print("\nAnalog TGS2602: ");
         display.print(analogTGS2602);
+        display.print("\nTime left: ");
+        display.print(60 - i);
+        display.print(" s");
         display.display();
         delay(1000); // Display result for 1 second
 
