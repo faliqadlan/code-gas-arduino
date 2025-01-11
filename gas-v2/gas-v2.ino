@@ -184,15 +184,15 @@ void calibrateSensors()
 {
     Ro_MQ_135 = MQ135Calibration();
     EEPROM.put(0, Ro_MQ_135);
-    displayCalibrationResult("MQ135", Ro_MQ_135/RL_MQ_135);
+    displayCalibrationResult("MQ135", Ro_MQ_135 / RL_MQ_135);
 
     Ro_MQ_136 = MQ136Calibration();
     EEPROM.put(sizeof(float), Ro_MQ_136);
-    displayCalibrationResult("MQ136", Ro_MQ_136/RL_MQ_136);
+    displayCalibrationResult("MQ136", Ro_MQ_136 / RL_MQ_136);
 
     Ro_TGS_2602 = TGS2602Calibration();
     EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
-    displayCalibrationResult("TGS2602", Ro_TGS_2602/RL_TGS_2602);
+    displayCalibrationResult("TGS2602", Ro_TGS_2602 / RL_TGS_2602);
 
     display.clearDisplay();
     display.setCursor(0, 0);
