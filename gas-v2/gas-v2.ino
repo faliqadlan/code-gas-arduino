@@ -277,6 +277,8 @@ void measureAndLog()
 
         Serial.print("Analog Readings - MQ135: ");
         Serial.print(analogMQ135);
+        Serial.print(", NDIR: ");
+        Serial.print(analogNDIR);
         Serial.print(", MQ136: ");
         Serial.print(analogMQ136);
         Serial.print(", TGS2602: ");
@@ -286,14 +288,15 @@ void measureAndLog()
         display.setCursor(0, 0);
         display.print("Analog MQ135: ");
         display.print(analogMQ135);
+        display.print("\nAnalog NDIR: ");
+        display.print(analogNDIR);
         display.print("\nAnalog MQ136: ");
         display.print(analogMQ136);
         display.print("\nAnalog TGS2602: ");
         display.print(analogTGS2602);
-        display.print("\nAnalog NDIR: ");
-        display.print(analogNDIR);
+
         display.display();
-        delay(5000); // Display result for 1 second
+        delay(5000); // Display result for few second
 
         if (i == totalcount - 1)
         {
@@ -315,9 +318,9 @@ void measureAndLog()
         display.print(" ppm\nH2S (TGS2602): ");
         display.print(ppmH2sTgs2602);
         display.print(" ppm\nCount left: ");
-        display.print(totalcount - i);
+        display.print(totalcount - i + 1);
         display.display();
-        delay(5000); // Display result for 1 second
+        delay(5000); // Display result for few second
 
         if (i == totalcount - 1)
         {
@@ -331,9 +334,9 @@ void measureAndLog()
         logToSD("PPM H2S (MQ136): ", ppmH2sMq136);
         logToSD("PPM H2S (TGS2602): ", ppmH2sTgs2602);
         logToSD("Analog MQ135: ", analogMQ135);
+        logToSD("Analog NDIR: ", analogNDIR);
         logToSD("Analog MQ136: ", analogMQ136);
         logToSD("Analog TGS2602: ", analogTGS2602);
-        logToSD("Analog NDIR: ", analogNDIR);
     }
 }
 
