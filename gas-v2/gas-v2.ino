@@ -84,10 +84,7 @@ void setup()
     if (rtc.lostPower())
     {
         Serial.println("RTC lost power, let's set the time!");
-        // The following line sets the RTC to the date & time this sketch was compiled
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-        // Uncomment the following line to set the date & time manually
-        // rtc.adjust(DateTime(2023, 10, 10, 12, 0, 0));
     }
 
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
@@ -99,7 +96,6 @@ void setup()
     display.clearDisplay();
     Serial.println("Display initialized");
 
-    // Set the default voltage of the reference voltage
     analogReference(DEFAULT);
 
     pinMode(MQ_135_PIN, INPUT);
@@ -107,7 +103,6 @@ void setup()
     pinMode(CalibrationButton, INPUT_PULLUP);
     pinMode(MeasurementButton, INPUT_PULLUP);
 
-    // Load calibration values from EEPROM
     EEPROM.get(0, Ro_MQ_135);
     EEPROM.get(sizeof(float), Ro_MQ_136);
     EEPROM.get(2 * sizeof(float), Ro_TGS_2602);
@@ -115,31 +110,33 @@ void setup()
     if (isnan(Ro_MQ_135) || isnan(Ro_MQ_136) || isnan(Ro_TGS_2602))
     {
         int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
-        Serial.print("Calibrating gas sensor in ");
-        display.print("Calibrating gas sensor in ");
-        Serial.print(timeCal * 3);
-        display.print(timeCal * 3);
-        Serial.println(" seconds");
-        display.println(" seconds");
+        displayText("Calibrating gas sensor in", 1, WHITE, 0, 0);
+        displayText(String(timeCal * 3).c_str(), 1, WHITE, 0, 10);
+        displayText("seconds", 1, WHITE, 0, 20);
         delay(1000);
         display.clearDisplay();
 
         Serial.println("Calibrating MQ135");
+        displayText("Calibrating MQ135", 1, WHITE, 0, 0);
         Ro_MQ_135 = MQ135Calibration();
         EEPROM.put(0, Ro_MQ_135);
         displayCalibrationResult("MQ135", Ro_MQ_135 / RL_MQ_135);
 
         Serial.println("Calibrating MQ136");
+        displayText("Calibrating MQ136", 1, WHITE, 0, 0);
         Ro_MQ_136 = MQ136Calibration();
         EEPROM.put(sizeof(float), Ro_MQ_136);
         displayCalibrationResult("MQ136", Ro_MQ_136 / RL_MQ_136);
 
         Serial.println("Calibrating TGS2602");
+        displayText("Calibrating TGS2602", 1, WHITE, 0, 0);
         Ro_TGS_2602 = TGS2602Calibration();
         EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
         displayCalibrationResult("TGS2602", Ro_TGS_2602 / RL_TGS_2602);
 
-        Serial.println("Calibration is done...\n");
+        displayText("Calibration done", 1, WHITE, 0, 0);
+        delay(2000);
+        display.clearDisplay();
     }
 
     Serial.print("Ro MQ135=");
@@ -159,15 +156,14 @@ void setup()
 
 void loop()
 {
-    // Serial.println(digitalRead(CalibrationButton));
-    // Serial.println(digitalRead(MeasurementButton));
-    // Serial.println(isCalibrating);
-    // Serial.println(isMeasuring);
+    displayText("Press Green for Calibration", 1, WHITE, 0, 0);
+    displayText("Press Blue for Measurement", 1, WHITE, 0, 10);
 
     if (digitalRead(CalibrationButton) == LOW && !isCalibrating)
     {
         Serial.println("Calibrating...");
         isCalibrating = true;
+        displayText("Calibrating...", 1, WHITE, 0, 0);
         calibrateSensors();
         isCalibrating = false;
     }
@@ -176,6 +172,7 @@ void loop()
     {
         Serial.println("Measuring...");
         isMeasuring = true;
+        displayText("Measuring...", 1, WHITE, 0, 0);
         measureAndLog();
         isMeasuring = false;
     }
@@ -187,15 +184,28 @@ void calibrateSensors()
 {
     Ro_MQ_135 = MQ135Calibration();
     EEPROM.put(0, Ro_MQ_135);
-    displayCalibrationResult("MQ135", Ro_MQ_135);
+    displayCalibrationResult("MQ135", Ro_MQ_135/RL_MQ_135);
 
     Ro_MQ_136 = MQ136Calibration();
     EEPROM.put(sizeof(float), Ro_MQ_136);
-    displayCalibrationResult("MQ136", Ro_MQ_136);
+    displayCalibrationResult("MQ136", Ro_MQ_136/RL_MQ_136);
 
     Ro_TGS_2602 = TGS2602Calibration();
     EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
-    displayCalibrationResult("TGS2602", Ro_TGS_2602);
+    displayCalibrationResult("TGS2602", Ro_TGS_2602/RL_TGS_2602);
+
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Calibration Results:");
+    display.print("MQ135 Ro=");
+    display.print(Ro_MQ_135 / RL_MQ_135);
+    display.print(" kohm\nMQ136 Ro=");
+    display.print(Ro_MQ_136 / RL_MQ_136);
+    display.print(" kohm\nTGS2602 Ro=");
+    display.print(Ro_TGS_2602 / RL_TGS_2602);
+    display.print(" kohm");
+    display.display();
+    delay(5000); // Display result for 5 seconds
 
     Serial.println("Calibration is done...\n");
 }
@@ -214,7 +224,6 @@ void displayCalibrationResult(const char *sensor, float value)
 
 void measureAndLog()
 {
-    // Check if calibration values are loaded
     if (isnan(Ro_MQ_135) || isnan(Ro_MQ_136) || isnan(Ro_TGS_2602))
     {
         Serial.println("Calibration values not found. Please calibrate first.");
@@ -223,105 +232,95 @@ void measureAndLog()
 
     Serial.println("Loop is running");
 
-    // read humidity
-    Serial.println("Reading humidity");
-    float humi = dht11.readHumidity();
-    Serial.print("Humidity: ");
-    Serial.println(humi);
-
-    // read temperature as Celsius
-    Serial.println("Reading temperature");
-    float tempC = dht11.readTemperature();
-    Serial.print("Temperature: ");
-    Serial.println(tempC);
-
-    // ppm co2 mq 135
-    Serial.println("Reading CO2 (MQ135)");
-    long ppmCo2Mq135 = MQ135GetPPM(tempC, humi);
-    Serial.print("CO2 (MQ135): ");
-    Serial.println(ppmCo2Mq135);
-
-    // ppm h2s mq 136
-    Serial.println("Reading H2S (MQ136)");
-    long ppmH2sMq136 = MQ136GetPPM(tempC, humi);
-    Serial.print("H2S (MQ136): ");
-    Serial.println(ppmH2sMq136);
-
-    // ppm h2s tgs 2602
-    Serial.println("Reading H2S (TGS2602)");
-    long ppmH2sTgs2602 = TGS2602GetPPM(tempC, humi);
-    Serial.print("H2S (TGS2602): ");
-    Serial.println(ppmH2sTgs2602);
-
-    // ppm co2 ndir
-    Serial.println("Reading CO2 (NDIR)");
-    long ppmco2ndir = readNDIRCO2(NDIR_PIN);
-    Serial.print("CO2 (NDIR): ");
-    Serial.println(ppmco2ndir);
-
-    Serial.print("Temperature: ");
-    Serial.print(tempC);
-    Serial.print(" C, Humidity: ");
-    Serial.print(humi);
-    Serial.print(" %, CO2 (MQ135): ");
-    Serial.print(ppmCo2Mq135);
-    Serial.print(" ppm, CO2 (NDIR): ");
-    Serial.print(ppmco2ndir);
-    Serial.print(" ppm, H2S (MQ136): ");
-    Serial.print(ppmH2sMq136);
-    Serial.print(" ppm, H2S (TGS2602): ");
-    Serial.print(ppmH2sTgs2602);
-    Serial.println(" ppm");
-
-    // Log data to SD card
-    if (SD.begin(PIN_SPI_CS))
+    for (int i = 0; i < 60; i++)
     {
-        DateTime now = rtc.now();
-        snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
-        myFile = SD.open(filename, FILE_WRITE);
-        if (myFile)
+        float humi = dht11.readHumidity();
+        float tempC = dht11.readTemperature();
+
+        long ppmCo2Mq135 = MQ135GetPPM(tempC, humi);
+        long ppmH2sMq136 = MQ136GetPPM(tempC, humi);
+        long ppmH2sTgs2602 = TGS2602GetPPM(tempC, humi);
+        long ppmco2ndir = readNDIRCO2(NDIR_PIN);
+
+        int analogMQ135 = analogRead(MQ_135_PIN);
+        int analogMQ136 = analogRead(MQ_136_PIN);
+        int analogTGS2602 = analogRead(TGS_2602_PIN);
+
+        Serial.print("Temperature: ");
+        Serial.print(tempC);
+        Serial.print(" C, Humidity: ");
+        Serial.print(humi);
+        Serial.print(" %, CO2 (MQ135): ");
+        Serial.print(ppmCo2Mq135);
+        Serial.print(" ppm, CO2 (NDIR): ");
+        Serial.print(ppmco2ndir);
+        Serial.print(" ppm, H2S (MQ136): ");
+        Serial.print(ppmH2sMq136);
+        Serial.print(" ppm, H2S (TGS2602): ");
+        Serial.print(ppmH2sTgs2602);
+        Serial.println(" ppm");
+
+        Serial.print("Analog Readings - MQ135: ");
+        Serial.print(analogMQ135);
+        Serial.print(", MQ136: ");
+        Serial.print(analogMQ136);
+        Serial.print(", TGS2602: ");
+        Serial.println(analogTGS2602);
+
+        display.clearDisplay();
+        display.setCursor(0, 0);
+        display.print("Temp: ");
+        display.print(tempC);
+        display.print(" C\nHum: ");
+        display.print(humi);
+        display.print(" %\nCO2 (MQ135): ");
+        display.print(ppmCo2Mq135);
+        display.print(" ppm\nCO2 (NDIR): ");
+        display.print(ppmco2ndir);
+        display.print(" ppm\nH2S (MQ136): ");
+        display.print(ppmH2sMq136);
+        display.print(" ppm\nH2S (TGS2602): ");
+        display.print(ppmH2sTgs2602);
+        display.print(" ppm\nAnalog MQ135: ");
+        display.print(analogMQ135);
+        display.print("\nAnalog MQ136: ");
+        display.print(analogMQ136);
+        display.print("\nAnalog TGS2602: ");
+        display.print(analogTGS2602);
+        display.display();
+        delay(1000); // Display result for 1 second
+
+        if (SD.begin(PIN_SPI_CS))
         {
-            myFile.print("Start Measure Time: ");
-            myFile.print(now.timestamp());
-            myFile.println();
-            myFile.print("Temperature: ");
-            myFile.print(tempC);
-            myFile.print(" C, Humidity: ");
-            myFile.print(humi);
-            myFile.print(" %, CO2 (MQ135): ");
-            myFile.print(ppmCo2Mq135);
-            myFile.print(" ppm, CO2 (NDIR): ");
-            myFile.print(ppmco2ndir);
-            myFile.print(" ppm, H2S (MQ136): ");
-            myFile.print(ppmH2sMq136);
-            myFile.print(" ppm, H2S (TGS2602): ");
-            myFile.print(ppmH2sTgs2602);
-            myFile.println(" ppm");
-            myFile.close();
+            DateTime now = rtc.now();
+            snprintf(filename, sizeof(filename), "%02d%02d%02d%02d.txt", now.month(), now.day(), now.year() % 100, now.hour());
+            myFile = SD.open(filename, FILE_WRITE);
+            if (myFile)
+            {
+                myFile.print("Time: ");
+                myFile.print(now.timestamp());
+                myFile.print(", Temp: ");
+                myFile.print(tempC);
+                myFile.print(" C, Hum: ");
+                myFile.print(humi);
+                myFile.print(" %, CO2 (MQ135): ");
+                myFile.print(ppmCo2Mq135);
+                myFile.print(" ppm, CO2 (NDIR): ");
+                myFile.print(ppmco2ndir);
+                myFile.print(" ppm, H2S (MQ136): ");
+                myFile.print(ppmH2sMq136);
+                myFile.print(" ppm, H2S (TGS2602): ");
+                myFile.print(ppmH2sTgs2602);
+                myFile.print(" ppm, Analog MQ135: ");
+                myFile.print(analogMQ135);
+                myFile.print(", Analog MQ136: ");
+                myFile.print(analogMQ136);
+                myFile.print(", Analog TGS2602: ");
+                myFile.println(analogTGS2602);
+                myFile.close();
+            }
         }
     }
-
-    // Display measurement results on OLED
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("Temp: ");
-    display.print(tempC);
-    display.print(" C\nHum: ");
-    display.print(humi);
-    display.print(" %\nCO2 (MQ135): ");
-    display.print(ppmCo2Mq135);
-    display.print(" ppm\nCO2 (NDIR): ");
-    display.print(ppmco2ndir);
-    display.print(" ppm\nH2S (MQ136): ");
-    display.print(ppmH2sMq136);
-    display.print(" ppm\nH2S (TGS2602): ");
-    display.print(ppmH2sTgs2602);
-    display.print(" ppm");
-    display.display();
-    delay(3000); // Display result for 3 seconds
-
-    // delay 3s
-    delay(3000);
 }
 
 /**
