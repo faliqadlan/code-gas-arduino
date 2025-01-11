@@ -8,7 +8,7 @@
 #include <EEPROM.h>
 
 #define DHT11_PIN 46
-#define PIN_SPI_CS 47
+#define PIN_SPI_CS 53
 #define CalibrationButton 49
 #define MeasurementButton 48
 

@@ -6,9 +6,10 @@
  * Tutorial page: https://arduinogetstarted.com/tutorials/arduino-micro-sd-card
  */
 
+#include <SPI.h>
 #include <SD.h>
 
-#define PIN_SPI_CS 4
+#define PIN_SPI_CS 53
 
 File myFile;
 
@@ -19,8 +20,8 @@ void setup()
     if (!SD.begin(PIN_SPI_CS))
     {
         Serial.println(F("SD CARD FAILED, OR NOT PRESENT!"));
-        while (1)
-            ; // don't do anything more:
+        // while (1)
+        //     ; // don't do anything more:
     }
 
     Serial.println(F("SD CARD INITIALIZED."));
