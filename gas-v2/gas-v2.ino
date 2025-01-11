@@ -206,7 +206,7 @@ void calibrateSensors()
     display.print(Ro_TGS_2602 / R1000kohm);
     display.print(" kohm");
     display.display();
-    delay(5000); // Display result for 5 seconds
+    delay(10000); // Display result for 5 seconds
 
     Serial.println("Calibration is done...\n");
 }
@@ -232,8 +232,9 @@ void measureAndLog()
     }
 
     Serial.println("Loop is running");
+    int totalcount = 10;
 
-    for (int i = 0; i < 60; i++)
+    for (int i = 0; i < totalcount; i++)
     {
         float humi = dht11.readHumidity();
         float tempC = dht11.readTemperature();
@@ -246,6 +247,7 @@ void measureAndLog()
         int analogMQ135 = analogRead(MQ_135_PIN);
         int analogMQ136 = analogRead(MQ_136_PIN);
         int analogTGS2602 = analogRead(TGS_2602_PIN);
+        int analogNDIR = analogRead(NDIR_PIN);
 
         Serial.print("Temperature: ");
         Serial.print(tempC);
@@ -270,6 +272,24 @@ void measureAndLog()
 
         display.clearDisplay();
         display.setCursor(0, 0);
+        display.print("Analog MQ135: ");
+        display.print(analogMQ135);
+        display.print("\nAnalog MQ136: ");
+        display.print(analogMQ136);
+        display.print("\nAnalog TGS2602: ");
+        display.print(analogTGS2602);
+        display.print("\nAnalog NDIR: ");
+        display.print(analogNDIR);
+        display.display();
+        delay(5000); // Display result for 1 second
+
+        if (i == totalcount-1)
+        {
+            delay(10000); // Delay for 10 seconds on the last iteration
+        }
+
+        display.clearDisplay();
+        display.setCursor(0, 0);
         display.print("Temp: ");
         display.print(tempC);
         display.print(" C\nHum: ");
@@ -282,17 +302,15 @@ void measureAndLog()
         display.print(ppmH2sMq136);
         display.print(" ppm\nH2S (TGS2602): ");
         display.print(ppmH2sTgs2602);
-        display.print(" ppm\nAnalog MQ135: ");
-        display.print(analogMQ135);
-        display.print("\nAnalog MQ136: ");
-        display.print(analogMQ136);
-        display.print("\nAnalog TGS2602: ");
-        display.print(analogTGS2602);
-        display.print("\nTime left: ");
-        display.print(60 - i);
-        display.print(" s");
+        display.print(" ppm\nCount left: ");
+        display.print(totalcount - i);
         display.display();
         delay(1000); // Display result for 1 second
+
+        if (i == 59)
+        {
+            delay(10000); // Delay for 10 seconds on the last iteration
+        }
 
         if (SD.begin(PIN_SPI_CS))
         {
@@ -321,6 +339,8 @@ void measureAndLog()
                 myFile.print(analogMQ136);
                 myFile.print(", Analog TGS2602: ");
                 myFile.println(analogTGS2602);
+                myFile.print(", Analog NDIR: ");
+                myFile.println(analogNDIR);
                 myFile.close();
             }
         }
