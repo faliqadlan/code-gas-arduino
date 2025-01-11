@@ -7,10 +7,10 @@
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
 
-#define DHT11_PIN 48
+#define DHT11_PIN 47
 #define PIN_SPI_CS 53
-#define CalibrationButton 46
-#define MeasurementButton 47
+#define CalibrationButton 49
+#define MeasurementButton 48
 
 #define MQ_135_PIN PIN_A0                // Define the analog pin A1 for MQ135 sensor
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor
@@ -157,8 +157,8 @@ void setup()
 
 void loop()
 {
-    displayText("Press Green for Calibration", 1, WHITE, 0, 0);
-    displayText("Press Blue for Measurement", 1, WHITE, 0, 10);
+    displayText("Press Blue for Calibration", 1, WHITE, 0, 0);
+    displayText("Press Green for Measurement", 1, WHITE, 0, 10);
 
     if (digitalRead(CalibrationButton) == LOW && !isCalibrating)
     {
