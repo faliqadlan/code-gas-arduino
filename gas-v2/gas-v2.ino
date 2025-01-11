@@ -93,6 +93,11 @@ void setup()
         Serial.println(F("SSD1306 allocation failed"));
     }
 
+    if (!SD.begin(PIN_SPI_CS))
+    {
+        Serial.println(F("SD CARD FAILED, OR NOT PRESENT!"));
+    }
+
     displayText("Start...", 1, WHITE, 0, 28);
     display.clearDisplay();
     Serial.println("Display initialized");
