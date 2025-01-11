@@ -16,6 +16,7 @@
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor
 #define TGS_2602_PIN PIN_A1              // Define the analog pin A3 for TGS2602 sensor
 #define NDIR_PIN PIN_A3                  // Define the analog pin A4 for NDIR sensor
+int R1000kohm = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_MQ_135 = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_MQ_136 = 1000;                    // Define the load resistance on the board, in kilo ohms
 int RL_TGS_2602 = 4700;                  // Define the load resistance on the board, in kilo ohms
@@ -120,19 +121,19 @@ void setup()
         displayText("Calibrating MQ135", 1, WHITE, 0, 0);
         Ro_MQ_135 = MQ135Calibration();
         EEPROM.put(0, Ro_MQ_135);
-        displayCalibrationResult("MQ135", Ro_MQ_135 / RL_MQ_135);
+        displayCalibrationResult("MQ135", Ro_MQ_135 / R1000kohm);
 
         Serial.println("Calibrating MQ136");
         displayText("Calibrating MQ136", 1, WHITE, 0, 0);
         Ro_MQ_136 = MQ136Calibration();
         EEPROM.put(sizeof(float), Ro_MQ_136);
-        displayCalibrationResult("MQ136", Ro_MQ_136 / RL_MQ_136);
+        displayCalibrationResult("MQ136", Ro_MQ_136 / R1000kohm);
 
         Serial.println("Calibrating TGS2602");
         displayText("Calibrating TGS2602", 1, WHITE, 0, 0);
         Ro_TGS_2602 = TGS2602Calibration();
         EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
-        displayCalibrationResult("TGS2602", Ro_TGS_2602 / RL_TGS_2602);
+        displayCalibrationResult("TGS2602", Ro_TGS_2602 / R1000kohm);
 
         displayText("Calibration done", 1, WHITE, 0, 0);
         delay(2000);
@@ -140,15 +141,15 @@ void setup()
     }
 
     Serial.print("Ro MQ135=");
-    Serial.print(Ro_MQ_135 / RL_MQ_135);
+    Serial.print(Ro_MQ_135 / R1000kohm);
     Serial.println("kohm");
 
     Serial.print("Ro MQ136=");
-    Serial.print(Ro_MQ_136 / RL_MQ_136);
+    Serial.print(Ro_MQ_136 / R1000kohm);
     Serial.println("kohm");
 
     Serial.print("Ro TGS2602=");
-    Serial.print(Ro_TGS_2602 / RL_TGS_2602);
+    Serial.print(Ro_TGS_2602 / R1000kohm);
     Serial.println("kohm");
 
     delay(5000);
@@ -184,25 +185,25 @@ void calibrateSensors()
 {
     Ro_MQ_135 = MQ135Calibration();
     EEPROM.put(0, Ro_MQ_135);
-    displayCalibrationResult("MQ135", Ro_MQ_135 / RL_MQ_135);
+    displayCalibrationResult("MQ135", Ro_MQ_135 / R1000kohm);
 
     Ro_MQ_136 = MQ136Calibration();
     EEPROM.put(sizeof(float), Ro_MQ_136);
-    displayCalibrationResult("MQ136", Ro_MQ_136 / RL_MQ_136);
+    displayCalibrationResult("MQ136", Ro_MQ_136 / R1000kohm);
 
     Ro_TGS_2602 = TGS2602Calibration();
     EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
-    displayCalibrationResult("TGS2602", Ro_TGS_2602 / RL_TGS_2602);
+    displayCalibrationResult("TGS2602", Ro_TGS_2602 / R1000kohm);
 
     display.clearDisplay();
     display.setCursor(0, 0);
     display.print("Calibration Results:");
     display.print("MQ135 Ro=");
-    display.print(Ro_MQ_135 / RL_MQ_135);
+    display.print(Ro_MQ_135 / R1000kohm);
     display.print(" kohm\nMQ136 Ro=");
-    display.print(Ro_MQ_136 / RL_MQ_136);
+    display.print(Ro_MQ_136 / R1000kohm);
     display.print(" kohm\nTGS2602 Ro=");
-    display.print(Ro_TGS_2602 / RL_TGS_2602);
+    display.print(Ro_TGS_2602 / R1000kohm);
     display.print(" kohm");
     display.display();
     delay(5000); // Display result for 5 seconds
