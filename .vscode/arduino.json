@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:mega",
-    "sketch": "oled-test\\oled-test.ino",
-    "port": "COM8",
+    "sketch": "gas-v2\\gas-v2.ino",
+    "port": "COM7",
     "configuration": "cpu=atmega2560"
 }

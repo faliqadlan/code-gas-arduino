@@ -1,5 +1,5 @@
 #include "DHT.h"
-#define DHT11_PIN 2
+#define DHT11_PIN 48
 
 #define MQ_135_PIN PIN_A0                // Define the analog pin A1 for MQ135 sensor
 #define MQ_136_PIN PIN_A2                // Define the analog pin A2 for MQ136 sensor

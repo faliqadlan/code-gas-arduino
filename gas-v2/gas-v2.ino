@@ -67,6 +67,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 bool isCalibrating = false;
 bool isMeasuring = false;
 
+void displayText(const char *text, uint8_t textSize, uint16_t color, int16_t x, int16_t y, uint16_t bg = BLACK);
+void displayNumber(uint8_t number);
+
 void setup()
 {
     Serial.begin(9600); // Initialize serial communication at 9600 baud rate
@@ -92,6 +95,7 @@ void setup()
         Serial.println(F("SSD1306 allocation failed"));
     }
 
+    displayText("Start...", 1, WHITE, 0, 28);
     display.clearDisplay();
     Serial.println("Display initialized");
 
@@ -108,7 +112,7 @@ void setup()
     EEPROM.get(sizeof(float), Ro_MQ_136);
     EEPROM.get(2 * sizeof(float), Ro_TGS_2602);
 
-    if (Ro_MQ_135 == 0 || Ro_MQ_136 == 0 || Ro_TGS_2602 == 0)
+    if (isnan(Ro_MQ_135) || isnan(Ro_MQ_136) || isnan(Ro_TGS_2602))
     {
         int timeCal = (CALIBARAION_SAMPLE_TIMES * CALIBRATION_SAMPLE_INTERVAL / 1000);
         Serial.print("Calibrating gas sensor in ");
@@ -155,8 +159,14 @@ void setup()
 
 void loop()
 {
+    // Serial.println(digitalRead(CalibrationButton));
+    // Serial.println(digitalRead(MeasurementButton));
+    // Serial.println(isCalibrating);
+    // Serial.println(isMeasuring);
+
     if (digitalRead(CalibrationButton) == LOW && !isCalibrating)
     {
+        Serial.println("Calibrating...");
         isCalibrating = true;
         calibrateSensors();
         isCalibrating = false;
@@ -164,6 +174,7 @@ void loop()
 
     if (digitalRead(MeasurementButton) == LOW && !isMeasuring)
     {
+        Serial.println("Measuring...");
         isMeasuring = true;
         measureAndLog();
         isMeasuring = false;
@@ -204,7 +215,7 @@ void displayCalibrationResult(const char *sensor, float value)
 void measureAndLog()
 {
     // Check if calibration values are loaded
-    if (Ro_MQ_135 == 0 || Ro_MQ_136 == 0 || Ro_TGS_2602 == 0)
+    if (isnan(Ro_MQ_135) || isnan(Ro_MQ_136) || isnan(Ro_TGS_2602))
     {
         Serial.println("Calibration values not found. Please calibrate first.");
         return;
@@ -684,7 +695,7 @@ long readNDIRCO2(int sensorIn)
     return ppmco2;
 }
 
-void logToSD(const char* message, float value)
+void logToSD(const char *message, float value)
 {
     if (SD.begin(PIN_SPI_CS))
     {
@@ -702,7 +713,7 @@ void logToSD(const char* message, float value)
     }
 }
 
-void logToSD(const char* message)
+void logToSD(const char *message)
 {
     if (SD.begin(PIN_SPI_CS))
     {
@@ -717,4 +728,36 @@ void logToSD(const char* message)
             myFile.close();
         }
     }
+}
+
+void displayText(const char *text, uint8_t textSize, uint16_t color, int16_t x, int16_t y, uint16_t bg)
+{
+    display.clearDisplay();
+    display.setTextSize(textSize);
+    display.setTextColor(color, bg);
+    display.setCursor(x, y);
+    display.println(text);
+    display.display();
+    delay(2000);
+    Serial.print("Displayed text: ");
+    Serial.println(text);
+}
+
+void displayNumber(uint8_t number)
+{
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0, 28);
+    display.print("0x");
+    display.print(number, HEX);
+    display.print("(HEX) = ");
+    display.print(number, DEC);
+    display.println("(DEC)");
+    display.display();
+    delay(2000);
+    Serial.print("Displayed number: 0x");
+    Serial.print(number, HEX);
+    Serial.print(" (HEX) = ");
+    Serial.print(number, DEC);
+    Serial.println(" (DEC)");
 }
