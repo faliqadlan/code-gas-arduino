@@ -149,6 +149,18 @@ void setup()
     saveCalibrationToSD("MQ136", Ro_MQ_136 / R1000kohm);
     saveCalibrationToSD("TGS2602", Ro_TGS_2602 / R1000kohm);
 
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Calibration Results:");
+    display.print("\nMQ135 Ro=");
+    display.print(Ro_MQ_135 / R1000kohm);
+    display.print(" kohm\nMQ136 Ro=");
+    display.print(Ro_MQ_136 / R1000kohm);
+    display.print(" kohm\nTGS2602 Ro=");
+    display.print(Ro_TGS_2602 / R1000kohm);
+    display.print(" kohm");
+    display.display();
+
     Serial.print("Ro MQ135=");
     Serial.print(Ro_MQ_135 / R1000kohm);
     Serial.println("kohm");
@@ -161,7 +173,7 @@ void setup()
     Serial.print(Ro_TGS_2602 / R1000kohm);
     Serial.println("kohm");
 
-    delay(5000);
+    delay(10000);
 }
 
 void loop()
@@ -210,7 +222,7 @@ void calibrateSensors()
     display.clearDisplay();
     display.setCursor(0, 0);
     display.print("Calibration Results:");
-    display.print("MQ135 Ro=");
+    display.print("\nMQ135 Ro=");
     display.print(Ro_MQ_135 / R1000kohm);
     display.print(" kohm\nMQ136 Ro=");
     display.print(Ro_MQ_136 / R1000kohm);
@@ -318,7 +330,7 @@ void measureAndLog()
         display.print(" ppm\nH2S (TGS2602): ");
         display.print(ppmH2sTgs2602);
         display.print(" ppm\nCount left: ");
-        display.print(totalcount - i + 1);
+        display.print(totalcount - i - 1);
         display.display();
         delay(5000); // Display result for few second
 
@@ -727,7 +739,7 @@ void logToSD(const char *message, float value)
             myFile.close();
 
             // Log success message
-            Serial.println("Data written to SD card successfully.");
+            // Serial.println("Data written to SD card successfully.");
         }
         else
         {
@@ -757,7 +769,7 @@ void logToSD(const char *message)
             myFile.close();
 
             // Log success message
-            Serial.println("Data written to SD card successfully.");
+            // Serial.println("Data written to SD card successfully.");
         }
         else
         {
@@ -788,7 +800,7 @@ void saveCalibrationToSD(const char *sensor, float value)
             myFile.print(value);
             myFile.println(" kohm");
             myFile.close();
-            Serial.println("Calibration data written to SD card successfully.");
+            // Serial.println("Calibration data written to SD card successfully.");
         }
         else
         {
