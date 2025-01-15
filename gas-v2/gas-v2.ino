@@ -360,10 +360,7 @@ void measureAndLog()
  */
 float MQ135Calibration()
 {
-    float val;
-    val = MQCalibration(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135);
-
-    return val;
+    return MQCalibration(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, 3);
 }
 
 /**
@@ -372,10 +369,7 @@ float MQ135Calibration()
  */
 float MQ136Calibration()
 {
-    float val;
-    val = MQCalibration(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136);
-
-    return val;
+    return MQCalibration(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136, 150);
 }
 
 /**
@@ -384,10 +378,7 @@ float MQ136Calibration()
  */
 float TGS2602Calibration()
 {
-    float val;
-    val = MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602);
-
-    return val;
+    return MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, 75);
 }
 
 /**
@@ -527,7 +518,7 @@ float MQResistanceCalculation(int raw_adc, float rl_value)
  * @param rl_value The load resistance value.
  * @return The calibrated Ro value.
  */
-float MQCalibration(int mq_pin, float ro_clean_air_factor, float rl_value)
+float MQCalibration(int mq_pin, float ro_clean_air_factor, float rl_value, int adc_limit)
 {
     int i;
     float val = 0;
@@ -535,10 +526,9 @@ float MQCalibration(int mq_pin, float ro_clean_air_factor, float rl_value)
     for (i = 0; i < CALIBARAION_SAMPLE_TIMES; i++)
     {
         int adc_value = analogRead(mq_pin);
-        if (adc_value > 5)
+        if (adc_value > adc_limit)
         {
-            adc_value = 5;
-            logToSD("ADC value above 5, hardcoded to 5");
+            adc_value = adc_limit;
         }
         val += MQResistanceCalculation(adc_value, rl_value);
         delay(CALIBRATION_SAMPLE_INTERVAL);
