@@ -534,7 +534,13 @@ float MQCalibration(int mq_pin, float ro_clean_air_factor, float rl_value)
 
     for (i = 0; i < CALIBARAION_SAMPLE_TIMES; i++)
     {
-        val += MQResistanceCalculation(analogRead(mq_pin), rl_value);
+        int adc_value = analogRead(mq_pin);
+        if (adc_value > 5)
+        {
+            adc_value = 5;
+            logToSD("ADC value above 5, hardcoded to 5");
+        }
+        val += MQResistanceCalculation(adc_value, rl_value);
         delay(CALIBRATION_SAMPLE_INTERVAL);
     }
     val = val / CALIBARAION_SAMPLE_TIMES;
