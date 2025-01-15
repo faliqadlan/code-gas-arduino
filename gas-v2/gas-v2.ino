@@ -306,7 +306,8 @@ void measureAndLog()
         display.print(analogMQ136);
         display.print("\nAnalog TGS2602: ");
         display.print(analogTGS2602);
-
+        display.print(" \nCount left: ");
+        display.print(totalcount - i - 1);
         display.display();
         delay(5000); // Display result for few second
 
@@ -349,6 +350,7 @@ void measureAndLog()
         logToSD("Analog NDIR: ", analogNDIR);
         logToSD("Analog MQ136: ", analogMQ136);
         logToSD("Analog TGS2602: ", analogTGS2602);
+        logToSD("Count left: ", totalcount - i - 1);
     }
 }
 
@@ -404,21 +406,24 @@ float MQ135GetPPM(float x, float H)
 
     rs_ro = rs / Ro_MQ_135;
 
-    rs_ro_corr = RsRoCorrection(x, H, MQ135TempHumCurve33, MQ135TempHumCurve85);
-
     Serial.print("MQ135 rs_ro before correction: ");
     Serial.println(rs_ro);
     logToSD("MQ135 rs_ro before correction: ", rs_ro);
 
-    Serial.print("MQ135 rs_ro_corr: ");
-    Serial.println(rs_ro_corr);
-    logToSD("MQ135 rs_ro_corr: ", rs_ro_corr);
+    if (!isnan(x) && !isnan(H))
+    {
+        rs_ro_corr = RsRoCorrection(x, H, MQ135TempHumCurve33, MQ135TempHumCurve85);
 
-    rs_ro = rs_ro / rs_ro_corr;
+        Serial.print("MQ135 rs_ro_corr: ");
+        Serial.println(rs_ro_corr);
+        logToSD("MQ135 rs_ro_corr: ", rs_ro_corr);
 
-    Serial.print("MQ135 rs_ro after correction: ");
-    Serial.println(rs_ro);
-    logToSD("MQ135 rs_ro after correction: ", rs_ro);
+        rs_ro = rs_ro / rs_ro_corr;
+
+        Serial.print("MQ135 rs_ro after correction: ");
+        Serial.println(rs_ro);
+        logToSD("MQ135 rs_ro after correction: ", rs_ro);
+    }
 
     ppm_val = MQGetGasPercentage(rs_ro, CO2_MQ135);
 
@@ -440,22 +445,24 @@ float MQ136GetPPM(float x, float H)
     rs = MQRead(MQ_136_PIN, RL_MQ_136);
 
     rs_ro = rs / Ro_MQ_136;
-
-    rs_ro_corr = RsRoCorrection(x, H, MQ136TempHumCurve33, MQ136TempHumCurve85);
-
     Serial.print("MQ136 rs_ro before correction: ");
     Serial.println(rs_ro);
     logToSD("MQ136 rs_ro before correction: ", rs_ro);
 
-    Serial.print("MQ136 rs_ro_corr: ");
-    Serial.println(rs_ro_corr);
-    logToSD("MQ136 rs_ro_corr: ", rs_ro_corr);
+    if (!isnan(x) && !isnan(H))
+    {
+        rs_ro_corr = RsRoCorrection(x, H, MQ136TempHumCurve33, MQ136TempHumCurve85);
 
-    rs_ro = rs_ro / rs_ro_corr;
+        Serial.print("MQ136 rs_ro_corr: ");
+        Serial.println(rs_ro_corr);
+        logToSD("MQ136 rs_ro_corr: ", rs_ro_corr);
 
-    Serial.print("MQ136 rs_ro after correction: ");
-    Serial.println(rs_ro);
-    logToSD("MQ136 rs_ro after correction: ", rs_ro);
+        rs_ro = rs_ro / rs_ro_corr;
+
+        Serial.print("MQ136 rs_ro after correction: ");
+        Serial.println(rs_ro);
+        logToSD("MQ136 rs_ro after correction: ", rs_ro);
+    }
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_MQ136);
 
@@ -478,21 +485,24 @@ float TGS2602GetPPM(float x, float H)
 
     rs_ro = rs / Ro_TGS_2602;
 
-    rs_ro_corr = RsRoCorrection3Curve(x, H, TGS2602TempHumCurve40, TGS2602TempHumCurve65, TGS2602TempHumCurve85);
-
     Serial.print("TGS2602 rs_ro before correction: ");
     Serial.println(rs_ro);
     logToSD("TGS2602 rs_ro before correction: ", rs_ro);
 
-    Serial.print("TGS2602 rs_ro_corr: ");
-    Serial.println(rs_ro_corr);
-    logToSD("TGS2602 rs_ro_corr: ", rs_ro_corr);
+    if (!isnan(x) && !isnan(H))
+    {
+        rs_ro_corr = RsRoCorrection3Curve(x, H, TGS2602TempHumCurve40, TGS2602TempHumCurve65, TGS2602TempHumCurve85);
 
-    rs_ro = rs_ro / rs_ro_corr;
+        Serial.print("TGS2602 rs_ro_corr: ");
+        Serial.println(rs_ro_corr);
+        logToSD("TGS2602 rs_ro_corr: ", rs_ro_corr);
 
-    Serial.print("TGS2602 rs_ro after correction: ");
-    Serial.println(rs_ro);
-    logToSD("TGS2602 rs_ro after correction: ", rs_ro);
+        rs_ro = rs_ro / rs_ro_corr;
+
+        Serial.print("TGS2602 rs_ro after correction: ");
+        Serial.println(rs_ro);
+        logToSD("TGS2602 rs_ro after correction: ", rs_ro);
+    }
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_TGS2602);
 
