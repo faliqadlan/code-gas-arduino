@@ -360,7 +360,7 @@ void measureAndLog()
  */
 float MQ135Calibration()
 {
-    return MQCalibration(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, 3);
+    return MQCalibration(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, 2);
 }
 
 /**
@@ -378,7 +378,7 @@ float MQ136Calibration()
  */
 float TGS2602Calibration()
 {
-    return MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, 75);
+    return MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, 50);
 }
 
 /**
