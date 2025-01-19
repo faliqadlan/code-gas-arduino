@@ -36,18 +36,22 @@ float Rs_ro_MQ_135 = 0;
 float Rs_ro_MQ_136 = 0;
 float Rs_ro_TGS_2602 = 0;
 
+int adc_limit_cal_MQ_135 = 3;    // Define the limit for the sensor to calibrate
+int adc_limit_cal_MQ_136 = 50;   // Define the limit for the sensor to calibrate
+int adc_limit_cal_TGS_2602 = 40; // Define the limit for the sensor to calibrate
+
 #define CO2_MQ135 1
 #define H2S_MQ136 2
 #define H2S_TGS2602 3
 
 float CO2CurveMQ135[2] = {-2.85, 2.0451};      // Curve for CO2 gas for MQ135 sensor
-float H2SCurveMQ136[2] = {-3.5, 1.547};        // Curve for H2S gas for MQ136 sensor
+float H2SCurveMQ136[2] = {-3.4981, 1.547};     // Curve for H2S gas for MQ136 sensor
 float H2SCurveTGS2602[2] = {-2.7245, -1.1293}; // Curve for H2S gas for TGS2602 sensor
 
 float MQ135TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};   // Temp-Humidity correction curve for MQ135 at 33% humidity
 float MQ135TempHumCurve85[3] = {0.0003, -0.023, 1.2528};    // Temp-Humidity correction curve for MQ135 at 85% humidity
-float MQ136TempHumCurve33[3] = {0.0004, -0.0261, 1.3869};   // Temp-Humidity correction curve for MQ136 at 33% humidity
-float MQ136TempHumCurve85[3] = {0.0003, -0.023, 1.2528};    // Temp-Humidity correction curve for MQ136 at 85% humidity
+float MQ136TempHumCurve33[3] = {0.0004, -0.026, 1.379};     // Temp-Humidity correction curve for MQ136 at 33% humidity
+float MQ136TempHumCurve85[3] = {0.0003, -0.023, 1.2496};    // Temp-Humidity correction curve for MQ136 at 85% humidity
 float TGS2602TempHumCurve40[3] = {0.0002, -0.0349, 1.5619}; // Temp-Humidity correction curve for TGS2602 at 40% humidity
 float TGS2602TempHumCurve65[3] = {0.0002, -0.0373, 1.6632}; // Temp-Humidity correction curve for TGS2602 at 65% humidity
 float TGS2602TempHumCurve85[3] = {0.0003, -0.0443, 1.8361}; // Temp-Humidity correction curve for TGS2602 at 85% humidity
@@ -360,7 +364,7 @@ void measureAndLog()
  */
 float MQ135Calibration()
 {
-    return MQCalibration(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, 2);
+    return MQCalibration(MQ_135_PIN, RO_MQ_135_CLEAN_AIR_FACTOR, RL_MQ_135, adc_limit_cal_MQ_135);
 }
 
 /**
@@ -369,7 +373,7 @@ float MQ135Calibration()
  */
 float MQ136Calibration()
 {
-    return MQCalibration(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136, 150);
+    return MQCalibration(MQ_136_PIN, RO_MQ_136_CLEAN_AIR_FACTOR, RL_MQ_136, adc_limit_cal_MQ_136);
 }
 
 /**
@@ -378,7 +382,7 @@ float MQ136Calibration()
  */
 float TGS2602Calibration()
 {
-    return MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, 50);
+    return MQCalibration(TGS_2602_PIN, RO_TGS_2602_CLEAN_AIR_FACTOR, RL_TGS_2602, adc_limit_cal_TGS_2602);
 }
 
 /**
