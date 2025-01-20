@@ -75,6 +75,8 @@ bool isMeasuring = false;
 void displayText(const char *text, uint8_t textSize, uint16_t color, int16_t x, int16_t y, uint16_t bg = BLACK);
 void displayNumber(uint8_t number);
 
+bool isDebug = false;
+
 void setup()
 {
     Serial.begin(9600); // Initialize serial communication at 9600 baud rate
@@ -83,28 +85,33 @@ void setup()
 
     if (!rtc.begin())
     {
-        Serial.println("Couldn't find RTC");
+        if (isDebug)
+            Serial.println("Couldn't find RTC");
     }
 
     if (rtc.lostPower())
     {
-        Serial.println("RTC lost power, let's set the time!");
+        if (isDebug)
+            Serial.println("RTC lost power, let's set the time!");
         rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
     }
 
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
     {
-        Serial.println(F("SSD1306 allocation failed"));
+        if (isDebug)
+            Serial.println(F("SSD1306 allocation failed"));
     }
 
     if (!SD.begin(PIN_SPI_CS))
     {
-        Serial.println(F("SD CARD FAILED, OR NOT PRESENT!"));
+        if (isDebug)
+            Serial.println(F("SD CARD FAILED, OR NOT PRESENT!"));
     }
 
     displayText("Start...", 1, WHITE, 0, 28);
     display.clearDisplay();
-    Serial.println("Display initialized");
+    if (isDebug)
+        Serial.println("Display initialized");
 
     analogReference(DEFAULT);
 
@@ -126,19 +133,22 @@ void setup()
         delay(1000);
         display.clearDisplay();
 
-        Serial.println("Calibrating MQ135");
+        if (isDebug)
+            Serial.println("Calibrating MQ135");
         displayText("Calibrating MQ135", 1, WHITE, 0, 0);
         Ro_MQ_135 = MQ135Calibration();
         EEPROM.put(0, Ro_MQ_135);
         displayCalibrationResult("MQ135", Ro_MQ_135 / R1000kohm);
 
-        Serial.println("Calibrating MQ136");
+        if (isDebug)
+            Serial.println("Calibrating MQ136");
         displayText("Calibrating MQ136", 1, WHITE, 0, 0);
         Ro_MQ_136 = MQ136Calibration();
         EEPROM.put(sizeof(float), Ro_MQ_136);
         displayCalibrationResult("MQ136", Ro_MQ_136 / R1000kohm);
 
-        Serial.println("Calibrating TGS2602");
+        if (isDebug)
+            Serial.println("Calibrating TGS2602");
         displayText("Calibrating TGS2602", 1, WHITE, 0, 0);
         Ro_TGS_2602 = TGS2602Calibration();
         EEPROM.put(2 * sizeof(float), Ro_TGS_2602);
@@ -165,17 +175,20 @@ void setup()
     display.print(" kohm");
     display.display();
 
-    Serial.print("Ro MQ135=");
-    Serial.print(Ro_MQ_135 / R1000kohm);
-    Serial.println("kohm");
+    if (isDebug)
+    {
+        Serial.print("Ro MQ135=");
+        Serial.print(Ro_MQ_135 / R1000kohm);
+        Serial.println("kohm");
 
-    Serial.print("Ro MQ136=");
-    Serial.print(Ro_MQ_136 / R1000kohm);
-    Serial.println("kohm");
+        Serial.print("Ro MQ136=");
+        Serial.print(Ro_MQ_136 / R1000kohm);
+        Serial.println("kohm");
 
-    Serial.print("Ro TGS2602=");
-    Serial.print(Ro_TGS_2602 / R1000kohm);
-    Serial.println("kohm");
+        Serial.print("Ro TGS2602=");
+        Serial.print(Ro_TGS_2602 / R1000kohm);
+        Serial.println("kohm");
+    }
 
     delay(10000);
 }
@@ -187,7 +200,8 @@ void loop()
 
     if (digitalRead(CalibrationButton) == LOW && !isCalibrating)
     {
-        Serial.println("Calibrating...");
+        if (isDebug)
+            Serial.println("Calibrating...");
         isCalibrating = true;
         displayText("Calibrating...", 1, WHITE, 0, 0);
         calibrateSensors();
@@ -196,7 +210,8 @@ void loop()
 
     if (digitalRead(MeasurementButton) == LOW && !isMeasuring)
     {
-        Serial.println("Measuring...");
+        if (isDebug)
+            Serial.println("Measuring...");
         isMeasuring = true;
         displayText("Measuring...", 1, WHITE, 0, 0);
         measureAndLog();
@@ -236,7 +251,8 @@ void calibrateSensors()
     display.display();
     delay(10000); // Display result for 5 seconds
 
-    Serial.println("Calibration is done...\n");
+    if (isDebug)
+        Serial.println("Calibration is done...\n");
 }
 
 void displayCalibrationResult(const char *sensor, float value)
@@ -255,11 +271,14 @@ void measureAndLog()
 {
     if (isnan(Ro_MQ_135) || isnan(Ro_MQ_136) || isnan(Ro_TGS_2602))
     {
-        Serial.println("Calibration values not found. Please calibrate first.");
+        displayText("Calibration values not found", 1, WHITE, 0, 0);
+        if (isDebug)
+            Serial.println("Calibration values not found. Please calibrate first.");
         return;
     }
 
-    Serial.println("Loop is running");
+    if (isDebug)
+        Serial.println("Loop is running");
     int totalcount = 10;
 
     for (int i = 0; i < totalcount; i++)
@@ -277,28 +296,33 @@ void measureAndLog()
         int analogTGS2602 = analogRead(TGS_2602_PIN);
         int analogNDIR = analogRead(NDIR_PIN);
 
-        Serial.print("Temperature: ");
-        Serial.print(tempC);
-        Serial.print(" C, Humidity: ");
-        Serial.print(humi);
-        Serial.print(" %, CO2 (MQ135): ");
-        Serial.print(ppmCo2Mq135);
-        Serial.print(" ppm, CO2 (NDIR): ");
-        Serial.print(ppmco2ndir);
-        Serial.print(" ppm, H2S (MQ136): ");
-        Serial.print(ppmH2sMq136);
-        Serial.print(" ppm, H2S (TGS2602): ");
-        Serial.print(ppmH2sTgs2602);
-        Serial.println(" ppm");
+        if (isDebug)
+        {
+            Serial.print("Temperature: ");
+            Serial.print(tempC);
+            Serial.print(" C, Humidity: ");
+            Serial.print(humi);
+            Serial.print(" %, CO2 (MQ135): ");
+            Serial.print(ppmCo2Mq135);
+            Serial.print(" ppm, CO2 (NDIR): ");
+            Serial.print(ppmco2ndir);
+            Serial.print(" ppm, H2S (MQ136): ");
+            Serial.print(ppmH2sMq136);
+            Serial.print(" ppm, H2S (TGS2602): ");
+            Serial.println(ppmH2sTgs2602);
+        }
 
-        Serial.print("Analog Readings - MQ135: ");
-        Serial.print(analogMQ135);
-        Serial.print(", NDIR: ");
-        Serial.print(analogNDIR);
-        Serial.print(", MQ136: ");
-        Serial.print(analogMQ136);
-        Serial.print(", TGS2602: ");
-        Serial.println(analogTGS2602);
+        if (isDebug)
+        {
+            Serial.print("Analog Readings - MQ135: ");
+            Serial.print(analogMQ135);
+            Serial.print(", NDIR: ");
+            Serial.print(analogNDIR);
+            Serial.print(", MQ136: ");
+            Serial.print(analogMQ136);
+            Serial.print(", TGS2602: ");
+            Serial.println(analogTGS2602);
+        }
 
         display.clearDisplay();
         display.setCursor(0, 0);
@@ -401,27 +425,34 @@ float MQ135GetPPM(float x, float H)
 
     rs_ro = rs / Ro_MQ_135;
 
-    Serial.print("MQ135 rs_ro: ");
-    Serial.println(rs_ro);
+    if (isDebug)
+    {
+        Serial.print("MQ135 rs_ro: ");
+        Serial.println(rs_ro);
+    }
     logToSD("MQ135 rs_ro: ", rs_ro);
 
     if (!isnan(x) && !isnan(H))
     {
         rs_ro_corr = RsRoCorrection(x, H, MQ135TempHumCurve33, MQ135TempHumCurve85);
 
-        Serial.print("MQ135 rs_ro before correction: ");
-        Serial.println(rs_ro);
-        logToSD("MQ135 rs_ro before correction: ", rs_ro);
+        if (isDebug)
+        {
+            Serial.print("MQ135 rs_ro before correction: ");
+            Serial.println(rs_ro);
 
-        Serial.print("MQ135 rs_ro_corr: ");
-        Serial.println(rs_ro_corr);
+            Serial.print("MQ135 rs_ro_corr: ");
+            Serial.println(rs_ro_corr);
+
+            Serial.print("MQ135 rs_ro after correction: ");
+            Serial.println(rs_ro);
+        }
+
+        logToSD("MQ135 rs_ro before correction: ", rs_ro);
         logToSD("MQ135 rs_ro_corr: ", rs_ro_corr);
+        logToSD("MQ135 rs_ro after correction: ", rs_ro);
 
         rs_ro = rs_ro / rs_ro_corr;
-
-        Serial.print("MQ135 rs_ro after correction: ");
-        Serial.println(rs_ro);
-        logToSD("MQ135 rs_ro after correction: ", rs_ro);
     }
 
     ppm_val = MQGetGasPercentage(rs_ro, CO2_MQ135);
@@ -445,27 +476,34 @@ float MQ136GetPPM(float x, float H)
 
     rs_ro = rs / Ro_MQ_136;
 
-    Serial.print("MQ136 rs_ro: ");
-    Serial.println(rs_ro);
+    if (isDebug)
+    {
+        Serial.print("MQ136 rs_ro: ");
+        Serial.println(rs_ro);
+    }
     logToSD("MQ136 rs_ro: ", rs_ro);
 
     if (!isnan(x) && !isnan(H))
     {
         rs_ro_corr = RsRoCorrection(x, H, MQ136TempHumCurve33, MQ136TempHumCurve85);
 
-        Serial.print("MQ136 rs_ro before correction: ");
-        Serial.println(rs_ro);
-        logToSD("MQ136 rs_ro before correction: ", rs_ro);
+        if (isDebug)
+        {
+            Serial.print("MQ136 rs_ro before correction: ");
+            Serial.println(rs_ro);
 
-        Serial.print("MQ136 rs_ro_corr: ");
-        Serial.println(rs_ro_corr);
+            Serial.print("MQ136 rs_ro_corr: ");
+            Serial.println(rs_ro_corr);
+
+            Serial.print("MQ136 rs_ro after correction: ");
+            Serial.println(rs_ro);
+        }
+
+        logToSD("MQ136 rs_ro before correction: ", rs_ro);
         logToSD("MQ136 rs_ro_corr: ", rs_ro_corr);
+        logToSD("MQ136 rs_ro after correction: ", rs_ro);
 
         rs_ro = rs_ro / rs_ro_corr;
-
-        Serial.print("MQ136 rs_ro after correction: ");
-        Serial.println(rs_ro);
-        logToSD("MQ136 rs_ro after correction: ", rs_ro);
     }
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_MQ136);
@@ -489,27 +527,34 @@ float TGS2602GetPPM(float x, float H)
 
     rs_ro = rs / Ro_TGS_2602;
 
-    Serial.print("TGS2602 rs_ro: ");
-    Serial.println(rs_ro);
-    logToSD("TGS2602 rs_ro: ", rs_ro);
+    if (isDebug)
+    {
+        Serial.print("TGS2602 rs_ro: ");
+        Serial.println(rs_ro);
+    }
 
     if (!isnan(x) && !isnan(H))
     {
         rs_ro_corr = RsRoCorrection3Curve(x, H, TGS2602TempHumCurve40, TGS2602TempHumCurve65, TGS2602TempHumCurve85);
 
-        Serial.print("TGS2602 rs_ro before correction: ");
-        Serial.println(rs_ro);
-        logToSD("TGS2602 rs_ro before correction: ", rs_ro);
+        if (isDebug)
+        {
+            Serial.print("TGS2602 rs_ro before correction: ");
+            Serial.println(rs_ro);
 
-        Serial.print("TGS2602 rs_ro_corr: ");
-        Serial.println(rs_ro_corr);
+            Serial.print("TGS2602 rs_ro_corr: ");
+            Serial.println(rs_ro_corr);
+
+            Serial.print("TGS2602 rs_ro after correction: ");
+            Serial.println(rs_ro);
+        }
+
+        logToSD("TGS2602 rs_ro: ", rs_ro);
+        logToSD("TGS2602 rs_ro before correction: ", rs_ro);
         logToSD("TGS2602 rs_ro_corr: ", rs_ro_corr);
+        logToSD("TGS2602 rs_ro after correction: ", rs_ro);
 
         rs_ro = rs_ro / rs_ro_corr;
-
-        Serial.print("TGS2602 rs_ro after correction: ");
-        Serial.println(rs_ro);
-        logToSD("TGS2602 rs_ro after correction: ", rs_ro);
     }
 
     ppm_val = MQGetGasPercentage(rs_ro, H2S_TGS2602);
@@ -707,27 +752,33 @@ long readNDIRCO2(int sensorIn)
     // The analog signal is converted to a voltage
     float voltage = sensorValue * (5000.0 / 1023.0);
 
-    Serial.print("NDIR Sensor: ");
-    Serial.println(sensorValue);
-    logToSD("NDIR Sensor: ", sensorValue);
+    if (isDebug)
+    {
+        Serial.print("NDIR Sensor: ");
+        Serial.println(sensorValue);
 
-    Serial.print("NDIR Voltage: ");
-    Serial.println(voltage);
+        Serial.print("NDIR Voltage: ");
+        Serial.println(voltage);
+    }
+    logToSD("NDIR Sensor: ", sensorValue);
     logToSD("NDIR Voltage: ", voltage);
 
     if (voltage == 0)
     {
-        Serial.println("NDIR Fault");
+        if (isDebug)
+            Serial.println("NDIR Fault");
         logToSD("NDIR Fault");
     }
     else if (voltage < 400)
     {
-        Serial.println("NDIR Preheating");
+        if (isDebug)
+            Serial.println("NDIR Preheating");
         logToSD("NDIR Preheating");
     }
     else if (voltage > 2000)
     {
-        Serial.println("NDIR Exceeding measurement range");
+        if (isDebug)
+            Serial.println("NDIR Exceeding measurement range");
         logToSD("NDIR Exceeding measurement range");
     }
     else
@@ -735,9 +786,12 @@ long readNDIRCO2(int sensorIn)
         int voltage_difference = voltage - 400;
         float concentration = voltage_difference * 50.0 / 16.0;
         // Print Voltage
-        Serial.print("NDIR Voltage: ");
-        Serial.print(voltage);
-        Serial.println(" mv");
+        if (isDebug)
+        {
+            Serial.print("NDIR Voltage: ");
+            Serial.print(voltage);
+            Serial.println(" mv");
+                }
         logToSD("NDIR Voltage: ", voltage);
 
         ppmco2 = (long)concentration;
@@ -767,13 +821,15 @@ void logToSD(const char *message, float value)
         else
         {
             // Log failure message
-            Serial.println("Failed to open file for writing.");
+            if (isDebug)
+                Serial.println("Failed to open file for writing.");
         }
     }
     else
     {
         // Log failure message
-        Serial.println("SD card initialization failed.");
+        if (isDebug)
+            Serial.println("SD card initialization failed.");
     }
 }
 
@@ -797,13 +853,15 @@ void logToSD(const char *message)
         else
         {
             // Log failure message
-            Serial.println("Failed to open file for writing.");
+            if (isDebug)
+                Serial.println("Failed to open file for writing.");
         }
     }
     else
     {
         // Log failure message
-        Serial.println("SD card initialization failed.");
+        if (isDebug)
+            Serial.println("SD card initialization failed.");
     }
 }
 
@@ -827,12 +885,14 @@ void saveCalibrationToSD(const char *sensor, float value)
         }
         else
         {
-            Serial.println("Failed to open file for writing calibration data.");
+            if (isDebug)
+                Serial.println("Failed to open file for writing calibration data.");
         }
     }
     else
     {
-        Serial.println("SD card initialization failed.");
+        if (isDebug)
+            Serial.println("SD card initialization failed.");
     }
 }
 
@@ -845,8 +905,11 @@ void displayText(const char *text, uint8_t textSize, uint16_t color, int16_t x, 
     display.println(text);
     display.display();
     delay(2000);
-    Serial.print("Displayed text: ");
-    Serial.println(text);
+    if (isDebug)
+    {
+        Serial.print("Displayed text: ");
+        Serial.println(text);
+    }
 }
 
 void displayNumber(uint8_t number)
@@ -861,9 +924,12 @@ void displayNumber(uint8_t number)
     display.println("(DEC)");
     display.display();
     delay(2000);
-    Serial.print("Displayed number: 0x");
-    Serial.print(number, HEX);
-    Serial.print(" (HEX) = ");
-    Serial.print(number, DEC);
-    Serial.println(" (DEC)");
+    if (isDebug)
+    {
+        Serial.print("Displayed number: 0x");
+        Serial.print(number, HEX);
+        Serial.print(" (HEX) = ");
+        Serial.print(number, DEC);
+        Serial.println(" (DEC)");
+    }
 }
