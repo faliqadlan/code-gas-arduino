@@ -344,6 +344,7 @@ void measureAndLog()
             delay(10000); // Delay for 10 seconds on the last iteration
         }
 
+        logToSD("Count left: ", totalcount - i - 1);
         logToSD("Temp: ", tempC);
         logToSD("Hum: ", humi);
         logToSD("PPM CO2 (MQ135): ", ppmCo2Mq135);
@@ -354,7 +355,6 @@ void measureAndLog()
         logToSD("Analog NDIR: ", analogNDIR);
         logToSD("Analog MQ136: ", analogMQ136);
         logToSD("Analog TGS2602: ", analogTGS2602);
-        logToSD("Count left: ", totalcount - i - 1);
     }
 }
 
@@ -401,13 +401,17 @@ float MQ135GetPPM(float x, float H)
 
     rs_ro = rs / Ro_MQ_135;
 
-    Serial.print("MQ135 rs_ro before correction: ");
+    Serial.print("MQ135 rs_ro: ");
     Serial.println(rs_ro);
-    logToSD("MQ135 rs_ro before correction: ", rs_ro);
+    logToSD("MQ135 rs_ro: ", rs_ro);
 
     if (!isnan(x) && !isnan(H))
     {
         rs_ro_corr = RsRoCorrection(x, H, MQ135TempHumCurve33, MQ135TempHumCurve85);
+
+        Serial.print("MQ135 rs_ro before correction: ");
+        Serial.println(rs_ro);
+        logToSD("MQ135 rs_ro before correction: ", rs_ro);
 
         Serial.print("MQ135 rs_ro_corr: ");
         Serial.println(rs_ro_corr);
@@ -440,13 +444,18 @@ float MQ136GetPPM(float x, float H)
     rs = MQRead(MQ_136_PIN, RL_MQ_136);
 
     rs_ro = rs / Ro_MQ_136;
-    Serial.print("MQ136 rs_ro before correction: ");
+
+    Serial.print("MQ136 rs_ro: ");
     Serial.println(rs_ro);
-    logToSD("MQ136 rs_ro before correction: ", rs_ro);
+    logToSD("MQ136 rs_ro: ", rs_ro);
 
     if (!isnan(x) && !isnan(H))
     {
         rs_ro_corr = RsRoCorrection(x, H, MQ136TempHumCurve33, MQ136TempHumCurve85);
+
+        Serial.print("MQ136 rs_ro before correction: ");
+        Serial.println(rs_ro);
+        logToSD("MQ136 rs_ro before correction: ", rs_ro);
 
         Serial.print("MQ136 rs_ro_corr: ");
         Serial.println(rs_ro_corr);
@@ -480,13 +489,17 @@ float TGS2602GetPPM(float x, float H)
 
     rs_ro = rs / Ro_TGS_2602;
 
-    Serial.print("TGS2602 rs_ro before correction: ");
+    Serial.print("TGS2602 rs_ro: ");
     Serial.println(rs_ro);
-    logToSD("TGS2602 rs_ro before correction: ", rs_ro);
+    logToSD("TGS2602 rs_ro: ", rs_ro);
 
     if (!isnan(x) && !isnan(H))
     {
         rs_ro_corr = RsRoCorrection3Curve(x, H, TGS2602TempHumCurve40, TGS2602TempHumCurve65, TGS2602TempHumCurve85);
+
+        Serial.print("TGS2602 rs_ro before correction: ");
+        Serial.println(rs_ro);
+        logToSD("TGS2602 rs_ro before correction: ", rs_ro);
 
         Serial.print("TGS2602 rs_ro_corr: ");
         Serial.println(rs_ro_corr);
