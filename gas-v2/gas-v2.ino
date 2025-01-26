@@ -108,6 +108,63 @@ void setup()
             Serial.println(F("SD CARD FAILED, OR NOT PRESENT!"));
     }
 
+    if (isDebug)
+        Serial.println(Serial.available());
+
+    if (Serial.available() > 0)
+    {
+        if (isDebug)
+            Serial.println("Waiting for time data...");
+        if (Serial.read() == 'T')
+        {
+            if (isDebug)
+                Serial.println("Time data received");
+            // Read the time from the serial port
+            while (Serial.available() < 7)
+            {
+                // Wait for the full time data to be available
+            }
+            int second = Serial.read();
+            int minute = Serial.read();
+            int hour = Serial.read();
+            int day = Serial.read();
+            int month = Serial.read();
+            int year = Serial.read() + 2000;
+
+            rtc.adjust(DateTime(year, month, day, hour, minute, second));
+            if (isDebug)
+                Serial.println("Time set successfully");
+        }
+    }
+    // else
+    // {
+    //     // set the date and time this way
+    //     //  26/01/2025 08:21:00
+
+    //     rtc.adjust(DateTime(2025, 1, 26, 8, 21, 0));
+
+    //     if (isDebug)
+    //         Serial.println("Time set to 26/01/2025 08:21:00");
+    // }
+
+    // print the current date and time
+    DateTime now = rtc.now();
+    if (isDebug)
+    {
+        Serial.print(now.year(), DEC);
+        Serial.print('/');
+        Serial.print(now.month(), DEC);
+        Serial.print('/');
+        Serial.print(now.day(), DEC);
+        Serial.print(" ");
+        Serial.print(now.hour(), DEC);
+        Serial.print(':');
+        Serial.print(now.minute(), DEC);
+        Serial.print(':');
+        Serial.print(now.second(), DEC);
+        Serial.println();
+    }
+
     displayText("Start...", 1, WHITE, 0, 28);
     display.clearDisplay();
     if (isDebug)
@@ -191,28 +248,6 @@ void setup()
     }
 
     delay(10000);
-
-    if (Serial.available() > 0)
-    {
-        if (Serial.read() == 'T')
-        {
-            // Read the time from the serial port
-            while (Serial.available() < 7)
-            {
-                // Wait for the full time data to be available
-            }
-            int second = Serial.read();
-            int minute = Serial.read();
-            int hour = Serial.read();
-            int day = Serial.read();
-            int month = Serial.read();
-            int year = Serial.read() + 2000;
-
-            rtc.adjust(DateTime(year, month, day, hour, minute, second));
-            if (isDebug)
-                Serial.println("Time set successfully");
-        }
-    }
 }
 
 void loop()
