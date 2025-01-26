@@ -191,6 +191,28 @@ void setup()
     }
 
     delay(10000);
+
+    if (Serial.available() > 0)
+    {
+        if (Serial.read() == 'T')
+        {
+            // Read the time from the serial port
+            while (Serial.available() < 7)
+            {
+                // Wait for the full time data to be available
+            }
+            int second = Serial.read();
+            int minute = Serial.read();
+            int hour = Serial.read();
+            int day = Serial.read();
+            int month = Serial.read();
+            int year = Serial.read() + 2000;
+
+            rtc.adjust(DateTime(year, month, day, hour, minute, second));
+            if (isDebug)
+                Serial.println("Time set successfully");
+        }
+    }
 }
 
 void loop()
@@ -791,7 +813,7 @@ long readNDIRCO2(int sensorIn)
             Serial.print("NDIR Voltage: ");
             Serial.print(voltage);
             Serial.println(" mv");
-                }
+        }
         logToSD("NDIR Voltage: ", voltage);
 
         ppmco2 = (long)concentration;

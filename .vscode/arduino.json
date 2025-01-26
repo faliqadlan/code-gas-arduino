@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:mega",
     "sketch": "gas-v2\\gas-v2.ino",
-    "port": "COM8",
+    "port": "COM6",
     "configuration": "cpu=atmega2560"
 }
